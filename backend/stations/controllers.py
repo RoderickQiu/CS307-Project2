@@ -56,4 +56,4 @@ def delete_station_controller(station_id):
     Stations.query.filter_by(id=station_id).delete()
     db.session.commit()
 
-    return ('Stations with Id "{}" deleted successfully!').format(station_id)
+    return ('Station with Id "{}" deleted successfully!').format(station_id)

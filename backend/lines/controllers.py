@@ -62,4 +62,4 @@ def delete_line_controller(line_id):
     Lines.query.filter_by(id=line_id).delete()
     db.session.commit()
 
-    return ('Lines with Id "{}" deleted successfully!').format(line_id)
+    return ('Line with Id "{}" deleted successfully!').format(line_id)
