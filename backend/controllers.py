@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
-from .. import db
-from .models import Line, Station, LineDetail
+from . import db
+from .models import Line, Station, LineDetail, Users, Cards, CardRides, UserRides
 
 
 # Query Object Methods => https://docs.sqlalchemy.org/en/14/orm/query.html#sqlalchemy.orm.Query
@@ -41,7 +41,10 @@ def create_line_controller():
 
 
 def retrieve_line_controller(line_id):
-    response = Line.query.get(line_id).toDict()
+    line = Line.query.get(line_id)
+    if line is None:
+        return jsonify({"error": "Line with Id '{}' does not exist.".format(line_id)}), 404
+    response = line.toDict()
     return jsonify(response)
 
 
@@ -98,7 +101,10 @@ def create_station_controller():
 
 
 def retrieve_station_controller(station_id):
-    response = Station.query.get(station_id).toDict()
+    station = Station.query.get(station_id)
+    if station is None:
+        return jsonify({"error": "Station with Id '{}' does not exist.".format(station_id)}), 404
+    response = station.toDict()
     return jsonify(response)
 
 
@@ -216,3 +222,125 @@ def get_n_station_on_line_controller(line_id, station_id, n):
             return "Station not found in the Line!"
     else:
         return "Station not found in the Line!"
+    
+def list_all_users_controller():
+    users = Users.query.all()
+    response = []
+    for user in users:
+        response.append(user.toDict())
+    return jsonify(response)
+
+def create_user_controller():
+    request_form = request.form.to_dict()
+    new_user = Users(
+        user_id_number=request_form["user_id_number"],
+        name=request_form["name"],
+        phone=request_form["phone"],
+        Gender=request_form["Gender"],
+        district=request_form["district"],
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    response = Users.query.get(request_form["user_id_number"]).toDict()
+    return jsonify(response)
+
+def list_all_cards_controller():
+    cards = Cards.query.all()
+    response = []
+    for card in cards:
+        response.append(card.toDict())
+    return jsonify(response)
+
+def create_card_controller():
+    request_form = request.form.to_dict()
+    new_card = Cards(
+        card_number=request_form["card_number"],
+        money=request_form["money"],
+        create_time=request_form["create_time"],
+    )
+    db.session.add(new_card)
+    db.session.commit()
+
+    response = Cards.query.get(request_form["card_number"]).toDict()
+    return jsonify(response)
+
+def list_all_card_rides_controller():
+    card_rides = CardRides.query.all()
+    response = []
+    for card_ride in card_rides:
+        response.append(card_ride.toDict())
+    return jsonify(response)
+
+def create_card_ride_controller():
+    request_form = request.form.to_dict()
+    card_rides = CardRides.query.all()
+    max_ride_id = max(card_ride.ride_id for card_ride in card_rides) if card_rides else 0
+    new_ride_id = max_ride_id + 1
+    new_card_ride = CardRides(
+        ride_id=new_ride_id,
+        card_id=request_form["card_id"],
+        on_the_ride=0,
+        from_station=request_form["from_station"],
+        to_station=request_form["from_station"],
+        price=0,
+        start_time=request_form["start_time"],
+        end_time=request_form["start_time"],
+    )
+    db.session.add(new_card_ride)
+    db.session.commit()
+
+    response = CardRides.query.get(new_ride_id).toDict()
+    return jsonify(response)
+
+def list_all_user_rides_controller():
+    user_rides = UserRides.query.all()
+    response = []
+    for user_ride in user_rides:
+        response.append(user_ride.toDict())
+    return jsonify(response)
+
+def create_user_ride_controller():
+    request_form = request.form.to_dict()
+    user_rides = UserRides.query.all()
+    max_ride_id = max(user_ride.ride_id for user_ride in user_rides) if user_rides else 0
+    new_ride_id = max_ride_id + 1
+    new_user_ride = UserRides(
+        ride_id=new_ride_id,
+        user_id=request_form["user_id"],
+        on_the_ride=0,
+        from_station=request_form["from_station"],
+        to_station=request_form["from_station"],
+        price=0,
+        start_time=request_form["start_time"],
+        end_time=request_form["start_time"],
+    )
+    db.session.add(new_user_ride)
+    db.session.commit()
+
+    response = UserRides.query.get(new_ride_id).toDict()
+    return jsonify(response)
+
+def retrieve_card_ride_controller(ride_id):
+    ride = CardRides.query.get(ride_id)
+    if ride is None:
+        return jsonify({"error": "Card Ride with Id '{}' does not exist.".format(ride_id)}), 404
+    response = ride.toDict()
+    return jsonify(response)
+
+def retrieve_user_ride_controller(ride_id):
+    ride = UserRides.query.get(ride_id)
+    if ride is None:
+        return jsonify({"error": "User Ride with Id '{}' does not exist.".format(ride_id)}), 404
+    response = ride.toDict()
+    return jsonify(response)
+
+def delete_card_ride_controller(ride_id):
+    CardRides.query.filter_by(ride_id=ride_id).delete()
+    db.session.commit()
+    return ('Card Ride with Id "{}" deleted successfully!').format(ride_id)
+
+def delete_user_ride_controller(ride_id):
+    UserRides.query.filter_by(ride_id=ride_id).delete()
+    db.session.commit()
+    return ('User Ride with Id "{}" deleted successfully!').format(ride_id)

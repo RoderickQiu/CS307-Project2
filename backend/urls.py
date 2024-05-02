@@ -1,6 +1,6 @@
 from flask import request
 
-from ..app import app
+from .app import app
 from .controllers import *
 
 
@@ -80,5 +80,61 @@ def remove_station_from_line(line_id, station_id):
 def get_n_station_on_line(line_id, station_id, n):
     if request.method == "GET":
         return get_n_station_on_line_controller(line_id, station_id, n)
+    else:
+        return "Method is Not Allowed"
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+@app.route("/users", methods=["GET", "POST"]) # /users
+def list_create_users():
+    if request.method == "GET":
+        return list_all_users_controller()
+    if request.method == "POST":
+        return create_user_controller()
+    else:
+        return "Method is Not Allowed"
+
+@app.route("/cards", methods=["GET", "POST"]) # /cards
+def list_create_cards():
+    if request.method == "GET":
+        return list_all_cards_controller()
+    if request.method == "POST":
+        return create_card_controller()
+    else:
+        return "Method is Not Allowed"
+
+@app.route("/card_rides", methods=["GET", "POST"]) # /card_ride
+def list_create_card_rides():
+    if request.method == "GET":
+        return list_all_card_rides_controller()
+    if request.method == "POST":
+        return create_card_ride_controller()
+    else:
+        return "Method is Not Allowed"
+    
+@app.route("/user_rides", methods=["GET", "POST"]) # /user_ride
+def list_create_user_rides():
+    if request.method == "GET":
+        return list_all_user_rides_controller()
+    if request.method == "POST":
+        return create_user_ride_controller()
+    else:
+        return "Method is Not Allowed"
+    
+@app.route("/card_rides/<ride_id>", methods=["GET", "DELETE"]) # /card_ride/1
+def retrieve_destroy_card_ride(ride_id):
+    if request.method == "GET":
+        return retrieve_card_ride_controller(ride_id)
+    if request.method == "DELETE":
+        return delete_card_ride_controller(ride_id)
+    else:
+        return "Method is Not Allowed"
+    
+@app.route("/user_rides/<ride_id>", methods=["GET", "DELETE"]) # /user_ride/1
+def retrieve_destroy_user_ride(ride_id):
+    if request.method == "GET":
+        return retrieve_user_ride_controller(ride_id)
+    if request.method == "DELETE":
+        return delete_user_ride_controller(ride_id)
     else:
         return "Method is Not Allowed"
