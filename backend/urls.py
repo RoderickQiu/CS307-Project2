@@ -121,20 +121,25 @@ def list_create_user_rides():
     else:
         return "Method is Not Allowed"
     
-@app.route("/card_rides/<ride_id>", methods=["GET", "DELETE"]) # /card_ride/1
+@app.route("/card_rides/<ride_id>", methods=["GET", "DELETE", "PUT"]) # /card_ride/1
 def retrieve_destroy_card_ride(ride_id):
     if request.method == "GET":
         return retrieve_card_ride_controller(ride_id)
     if request.method == "DELETE":
         return delete_card_ride_controller(ride_id)
+    if request.method == "PUT":
+        return update_card_ride_controller(ride_id)
     else:
         return "Method is Not Allowed"
     
-@app.route("/user_rides/<ride_id>", methods=["GET", "DELETE"]) # /user_ride/1
+@app.route("/user_rides/<ride_id>", methods=["GET", "DELETE", "PUT"]) # /user_ride/1
 def retrieve_destroy_user_ride(ride_id):
     if request.method == "GET":
         return retrieve_user_ride_controller(ride_id)
     if request.method == "DELETE":
         return delete_user_ride_controller(ride_id)
+    if request.method == "PUT":
+        return update_user_ride_controller(ride_id)
     else:
         return "Method is Not Allowed"
+    

@@ -344,3 +344,30 @@ def delete_user_ride_controller(ride_id):
     UserRides.query.filter_by(ride_id=ride_id).delete()
     db.session.commit()
     return ('User Ride with Id "{}" deleted successfully!').format(ride_id)
+
+def update_card_ride_controller(ride_id):
+    request_form = request.form.to_dict()
+    ride = CardRides.query.get(ride_id)
+
+    ride.on_the_ride = 1
+    ride.to_station = request_form["to_station"]
+    ride.price = request_form["price"]
+    ride.end_time = request_form["end_time"]
+
+    db.session.commit()
+
+    response = CardRides.query.get(ride_id).toDict()
+    return jsonify(response)
+
+def update_user_ride_controller(ride_id):
+    request_form = request.form.to_dict()
+    ride = UserRides.query.get(ride_id)
+    ride.on_the_ride = 1
+    ride.to_station = request_form["to_station"]
+    ride.price = request_form["price"]
+    ride.end_time = request_form["end_time"]
+
+    db.session.commit()
+
+    response = UserRides.query.get(ride_id).toDict()
+    return jsonify(response)
