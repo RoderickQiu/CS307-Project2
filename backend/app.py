@@ -13,8 +13,7 @@ def hello():
     return "Hello World!"
 
 
-from .lines.urls import *
-from .stations.urls import *
+from .lines_stations.urls import *
 
 if __name__ == "__main__":
     app.run()
