@@ -68,6 +68,10 @@ def update_line_controller(line_id):
 
 
 def delete_line_controller(line_id):
+    line = Line.query.get(line_id)
+    if line is None:
+        return jsonify({"error": "Line with Id '{}' does not exist.".format(line_id)}), 404
+
     Line.query.filter_by(line_id=line_id).delete()
     db.session.commit()
     return ('Line with Id "{}" deleted successfully!').format(line_id)
@@ -124,9 +128,12 @@ def update_station_controller(station_id):
 
 
 def delete_station_controller(station_id):
+    station = Station.query.get(station_id)
+    if station is None:
+        return jsonify({"error": "Station with Id '{}' does not exist.".format(station_id)}), 404
+
     Station.query.filter_by(station_id=station_id).delete()
     db.session.commit()
-
     return ('Station with Id "{}" deleted successfully!').format(station_id)
 
 
@@ -150,7 +157,7 @@ def delete_station_from_line_controller(line_id, station_id):
         ).format(station_id, line_id)
     db.session.commit()
 
-    return "Station not found in the Line!"
+    return jsonify({"error": "Station with Id '{}' and Line with Id '{}' does not exist.".format(station_id, line_id)}), 404
 
 
 def add_station_to_line_controller(line_id, station_id):
@@ -336,11 +343,19 @@ def retrieve_user_ride_controller(ride_id):
     return jsonify(response)
 
 def delete_card_ride_controller(ride_id):
+    card_ride = CardRides.query.get(ride_id)
+    if card_ride is None:
+        return jsonify({"error": "Card Ride with Id '{}' does not exist.".format(ride_id)}), 404
+
     CardRides.query.filter_by(ride_id=ride_id).delete()
     db.session.commit()
     return ('Card Ride with Id "{}" deleted successfully!').format(ride_id)
 
 def delete_user_ride_controller(ride_id):
+    user_ride = UserRides.query.get(ride_id)
+    if user_ride is None:
+        return jsonify({"error": "User Ride with Id '{}' does not exist.".format(ride_id)}), 404
+
     UserRides.query.filter_by(ride_id=ride_id).delete()
     db.session.commit()
     return ('User Ride with Id "{}" deleted successfully!').format(ride_id)
