@@ -1,7 +1,8 @@
 from flask import request, jsonify
 
 from .. import db
-from .models import Line, Station
+from .models import Line, Station, LineDetail
+
 
 # Query Object Methods => https://docs.sqlalchemy.org/en/14/orm/query.html#sqlalchemy.orm.Query
 # Session Object Methods => https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.Session
@@ -114,3 +115,97 @@ def delete_station_controller(station_id):
     db.session.commit()
 
     return ('Station with Id "{}" deleted successfully!').format(station_id)
+
+
+def delete_station_from_line_controller(line_id, station_id):
+    line_detail = LineDetail.query.filter_by(
+        line_id=line_id, station_id=station_id
+    ).first()
+    if line_detail is not None:
+        # Update the line_num of the following stations
+        following_stations = LineDetail.query.filter_by(line_id=line_id).filter(
+            LineDetail.line_num > line_detail.line_num
+        )
+        for following_station in following_stations:
+            following_station.line_num -= 1
+
+        db.session.delete(line_detail)
+
+        db.session.commit()
+        return (
+            'Station with Id "{}" removed from Line with Id "{}" successfully!'
+        ).format(station_id, line_id)
+    db.session.commit()
+
+    return "Station not found in the Line!"
+
+
+def add_station_to_line_controller(line_id, station_id):
+    request_form = request.form.to_dict()
+    position = int(request_form["line_num"])
+
+    line_detail = LineDetail.query.filter_by(
+        line_id=line_id, station_id=station_id
+    ).first()
+    if line_detail is not None:
+        return "Station already exists in the Line, abort!"
+    else:
+        # Update the line_num of the following stations
+        following_stations = LineDetail.query.filter_by(line_id=line_id).filter(
+            LineDetail.line_num >= position
+        )
+        for following_station in following_stations:
+            following_station.line_num += 1
+
+        # Add the new station to the line
+        new_line_detail = LineDetail(
+            line_id=line_id, station_id=station_id, line_num=position
+        )
+        db.session.add(new_line_detail)
+
+    db.session.commit()
+
+    response = (
+        LineDetail.query.filter_by(line_id=line_id, station_id=station_id)
+        .first()
+        .toDict()
+    )
+    return jsonify(response)
+
+
+def list_stations_on_line_controller(line_id):
+    line_details = (
+        LineDetail.query.filter_by(line_id=line_id).order_by(LineDetail.line_num).all()
+    )
+    response = []
+    for line_detail in line_details:
+        response.append(line_detail.toDict())
+    return jsonify(response)
+
+
+def get_station_on_line_controller(line_id, station_id):
+    line_detail = LineDetail.query.filter_by(
+        line_id=line_id, station_id=station_id
+    ).first()
+    if line_detail is not None:
+        return jsonify(line_detail.toDict())
+    else:
+        return "Station not found in the Line!"
+
+
+def get_n_station_on_line_controller(line_id, station_id, n):
+    line_detail = LineDetail.query.filter_by(
+        line_id=line_id, station_id=station_id
+    ).first()
+    if line_detail is not None:
+        n_station = (
+            LineDetail.query.filter_by(line_id=line_id)
+            .filter(LineDetail.line_num == line_detail.line_num + int(n))
+            .first()
+        )
+        if n_station is not None:
+            return jsonify(n_station.toDict())
+        else:
+            return "Station not found in the Line!"
+    else:
+        return "Station not found in the Line!"
