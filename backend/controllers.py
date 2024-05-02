@@ -371,3 +371,13 @@ def update_user_ride_controller(ride_id):
 
     response = UserRides.query.get(ride_id).toDict()
     return jsonify(response)
+
+def retrieve_online_person_controller():
+    card_rides = CardRides.query.filter_by(on_the_ride=0).all()
+    user_rides = UserRides.query.filter_by(on_the_ride=0).all()
+    response = []
+    for card_ride in card_rides:
+        response.append(card_ride.toDict())
+    for user_ride in user_rides:
+        response.append(user_ride.toDict())
+    return jsonify(response)

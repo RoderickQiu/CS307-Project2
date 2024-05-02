@@ -143,3 +143,9 @@ def retrieve_destroy_user_ride(ride_id):
     else:
         return "Method is Not Allowed"
     
+@app.route("/online", methods = ["GET"])
+def retrieve_online_person():
+    if request.method == "GET":
+        return retrieve_online_person_controller()
+    else:
+        return "Method is Not Allowed"
