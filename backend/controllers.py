@@ -431,13 +431,34 @@ def delete_user_ride_controller(ride_id):
     return ('User Ride with Id "{}" deleted successfully!').format(ride_id)
 
 
+def find(from_station, to_station):
+    with open('../Data_process/data.txt', 'r') as file:
+        lines = file.readlines()
+
+    for line in lines:
+        parts = line.strip().split(',')
+        if parts[2] == from_station and parts[3] == to_station:
+            return int(parts[4])
+
+    return jsonify({"error": "No matching route found."}), 404
+
 def update_card_ride_controller(ride_id):
     request_form = request.form.to_dict()
     ride = CardRides.query.get(ride_id)
+    
+    from_station_id = ride.from_station
+    to_station_id = request_form["to_station"]
+    from_station = Station.query.get(from_station_id)
+    to_station = Station.query.get(to_station_id)
+    if from_station is None or to_station is None:
+        return jsonify({"error": "Station with given id does not exist."}), 404
+    from_station_name = from_station.chinese_name
+    to_station_name = to_station.chinese_name
 
+    price = find(from_station_name, to_station_name)
     ride.on_the_ride = 1
     ride.to_station = request_form["to_station"]
-    ride.price = request_form["price"]
+    ride.price = price
     ride.end_time = request_form["end_time"]
 
     db.session.commit()
@@ -445,13 +466,23 @@ def update_card_ride_controller(ride_id):
     response = CardRides.query.get(ride_id).toDict()
     return jsonify(response)
 
-
 def update_user_ride_controller(ride_id):
     request_form = request.form.to_dict()
     ride = UserRides.query.get(ride_id)
+
+    from_station_id = ride.from_station
+    to_station_id = request_form["to_station"]
+    from_station = Station.query.get(from_station_id)
+    to_station = Station.query.get(to_station_id)
+    if from_station is None or to_station is None:
+        return jsonify({"error": "Station with given id does not exist."}), 404
+    from_station_name = from_station.chinese_name
+    to_station_name = to_station.chinese_name
+
+    price = find(from_station_name, to_station_name)
     ride.on_the_ride = 1
     ride.to_station = request_form["to_station"]
-    ride.price = request_form["price"]
+    ride.price = price
     ride.end_time = request_form["end_time"]
 
     db.session.commit()
