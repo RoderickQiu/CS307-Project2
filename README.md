@@ -28,7 +28,16 @@ Spring 2024.
 
 - 请求路径：`/stations`
 - 请求方法：`GET`, `POST`
-- 描述：获取所有车站的列表或创建新的车站。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`English_name` `Chinese_name` `District` `Introduction`)
+- 描述：获取所有车站的列表或创建新的车站。
+  - 对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`English_name` `Chinese_name` `District` `Introduction`)
+  - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值为这样的形式：
+      ```
+      {
+        "page": "1",
+        "total": "2000",
+        "result": { RESPONSE }
+      }
+      ```
 
 ##### 获取、更新或删除指定车站
 

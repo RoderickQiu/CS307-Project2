@@ -11,14 +11,14 @@ export const defaultLayoutConfig = {
         content: [
             {
                 type: 'component',
-                componentType: 'lines',
-                title: 'Lines',
+                componentType: 'stations',
+                title: 'Stations',
                 height: 20
             },
             {
                 type: 'component',
-                componentType: 'stations',
-                title: 'Stations',
+                componentType: 'lines',
+                title: 'Lines',
                 height: 20
             },
             {

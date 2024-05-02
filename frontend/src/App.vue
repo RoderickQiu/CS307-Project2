@@ -2,6 +2,7 @@
 import {ref} from 'vue'
 import {defaultLayoutConfig, GoldenLayout} from "@/components/golden/index.js";
 import Lines from "@/components/Lines.vue";
+import Stations from "@/components/Stations.vue";
 
 const GLayoutRoot = ref();
 
@@ -14,7 +15,7 @@ const GLayoutRoot = ref();
         </template>
 
         <template v-slot:stations>
-            Stations
+            <Stations/>
         </template>
 
         <template v-slot:cards>

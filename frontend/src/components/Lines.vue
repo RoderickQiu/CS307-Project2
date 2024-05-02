@@ -4,68 +4,53 @@ import {ref} from "vue";
 import {truncate} from "../util.js";
 import dayjs from "dayjs";
 
-const dialogVisible = ref(false), dialogMode = ref('add');
+const dialogVisible = ref(false), dialogMode = ref('add'), loading = ref(false);
 const line_name = ref(''), start_time = ref(''), end_time = ref(''), intro = ref(''), mileage = ref(''),
     color = ref(''), first_opening = ref(''), url = ref(''), line_id = ref('')
 
 const columns = [
     {
         title: 'Line ID',
-        key: 'line_id',
         data_key: 'line_id',
-        width: 50
     },
     {
         title: 'Line Name',
-        key: 'line_name',
         data_key: 'line_name',
-        width: 100
     },
     {
         title: 'Start Time',
-        key: 'start_time',
         data_key: 'start_time',
-        width: 100
     },
     {
         title: 'End Time',
-        key: 'end_time',
         data_key: 'end_time',
-        width: 100
+
     },
     {
         title: 'Intro',
-        key: 'intro',
         data_key: 'intro',
-        width: 200,
         isSpecial: true
     },
     {
         title: 'Mileage',
-        key: 'mileage',
         data_key: 'mileage',
-        width: 100
     },
     {
         title: 'Color',
-        key: 'color',
         data_key: 'color',
-        width: 50
+
     },
     {
         title: 'First Opening',
-        key: 'first_opening',
         data_key: 'first_opening',
-        width: 100,
         isSpecial: true
     },
     {
         title: 'URL',
-        key: 'url',
         data_key: 'url',
-        width: 100,
         isSpecial: true
-    }];
+    }
+];
 
 const data = ref([]);
 
@@ -204,6 +189,8 @@ function addLine() {
             </el-icon>
         </el-button>
         <el-table
+            element-loading-text="Loading..."
+            v-loading="loading"
             :data="data"
             width="100%" height="calc(100vh - 5.5rem)" class="top-12"
             fit

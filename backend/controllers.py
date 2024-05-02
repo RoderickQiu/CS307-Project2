@@ -93,11 +93,23 @@ def delete_line_controller(line_id):
 
 
 def list_all_stations_controller():
-    stations = Station.query.all()
+    elem_per_page = int(request.args.get("elem_per_page", 10))
+    page = int(
+        request.args.get("page", 1)
+    )  # for GET, use request.args instead of request.form
+
+    offset = (page - 1) * elem_per_page
+    stations = Station.query.order_by(Station.station_id).all()
     response = []
-    for station in stations:
+    for station in stations[offset : offset + elem_per_page]:
         response.append(station.toDict())
-    return jsonify(response)
+    return jsonify(
+        {
+            "page": page,
+            "total": len(stations),
+            "result": response,
+        }
+    )
 
 
 def create_station_controller():
@@ -432,20 +444,21 @@ def delete_user_ride_controller(ride_id):
 
 
 def find(from_station, to_station):
-    with open('../Data_process/data.txt', 'r') as file:
+    with open("../Data_process/data.txt", "r") as file:
         lines = file.readlines()
 
     for line in lines:
-        parts = line.strip().split(',')
+        parts = line.strip().split(",")
         if parts[2] == from_station and parts[3] == to_station:
             return int(parts[4])
 
     return jsonify({"error": "No matching route found."}), 404
 
+
 def update_card_ride_controller(ride_id):
     request_form = request.form.to_dict()
     ride = CardRides.query.get(ride_id)
-    
+
     from_station_id = ride.from_station
     to_station_id = request_form["to_station"]
     from_station = Station.query.get(from_station_id)
@@ -465,6 +478,7 @@ def update_card_ride_controller(ride_id):
 
     response = CardRides.query.get(ride_id).toDict()
     return jsonify(response)
+
 
 def update_user_ride_controller(ride_id):
     request_form = request.form.to_dict()

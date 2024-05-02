@@ -55,6 +55,6 @@ html, body {
     padding: 10px;
 }
 
-.el-date-editor.el-input, .el-input-number {
+.el-date-editor.el-input, .el-input-number, .el-dropdown {
     width: 100%;
 }
