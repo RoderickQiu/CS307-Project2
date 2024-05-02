@@ -24,6 +24,7 @@ def create_line_controller():
 
     new_line = Line(
         line_id=new_line_id,
+        line_name=request_form["line_name"],
         start_time=request_form["start_time"],
         end_time=request_form["end_time"],
         intro=request_form["intro"],
@@ -48,6 +49,7 @@ def update_line_controller(line_id):
     request_form = request.form.to_dict()
     line = Line.query.get(line_id)
 
+    line.line_name = request_form["line_name"]
     line.start_time = request_form["start_time"]
     line.end_time = request_form["end_time"]
     line.intro = request_form["intro"]

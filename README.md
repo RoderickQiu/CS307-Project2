@@ -14,13 +14,13 @@ Spring 2024.
 
 - 请求路径：`/lines`
 - 请求方法：`GET`, `POST`
-- 描述：获取所有线路的列表或创建新的线路。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
+- 描述：获取所有线路的列表或创建新的线路。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`line_name` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
 
 ##### 获取、更新或删除指定线路
 
 - 请求路径：`/lines/<line_id>`
 - 请求方法：`GET`, `PUT`, `DELETE`
-- 描述：获取、更新或删除指定ID的线路。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
+- 描述：获取、更新或删除指定ID的线路。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`line_name` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
 
 #### 车站操作
 

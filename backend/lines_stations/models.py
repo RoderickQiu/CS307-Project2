@@ -23,6 +23,7 @@ class Line(db.Model):
     line_id = db.Column(
         db.Integer, primary_key=True, nullable=False, unique=True
     )
+    line_name = db.Column(db.String(10), nullable=False)
     start_time = db.Column(db.String(10), nullable=False)
     end_time = db.Column(db.String(10), nullable=False)
     intro = db.Column(db.Text)
