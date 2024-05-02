@@ -236,7 +236,7 @@ def create_user_controller():
         user_id_number=request_form["user_id_number"],
         name=request_form["name"],
         phone=request_form["phone"],
-        Gender=request_form["Gender"],
+        gender=request_form["gender"],
         district=request_form["district"],
     )
     db.session.add(new_user)
