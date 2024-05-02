@@ -21,7 +21,7 @@ class LineDetail(db.Model):
 class Line(db.Model):
     __tablename__ = "lines"
     line_id = db.Column(
-        db.Integer, primary_key=True, nullable=False, unique=True, autoincrement=True
+        db.Integer, primary_key=True, nullable=False, unique=True
     )
     start_time = db.Column(db.String(10), nullable=False)
     end_time = db.Column(db.String(10), nullable=False)
@@ -40,7 +40,7 @@ class Line(db.Model):
 class Station(db.Model):
     __tablename__ = "stations"
     station_id = db.Column(
-        db.Integer, primary_key=True, nullable=False, unique=True, autoincrement=True
+        db.Integer, primary_key=True, nullable=False, unique=True
     )
     english_name = db.Column(db.String(900), nullable=False)
     chinese_name = db.Column(db.String(900), nullable=False)

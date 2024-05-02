@@ -16,11 +16,14 @@ def list_all_lines_controller():
         response.append(line.toDict())
     return jsonify(response)
 
-
 def create_line_controller():
     request_form = request.form.to_dict()
+    lines = Line.query.all()
+    max_line_id = max(line.line_id for line in lines) if lines else 0
+    new_line_id = max_line_id + 1
 
     new_line = Line(
+        line_id=new_line_id,
         start_time=request_form["start_time"],
         end_time=request_form["end_time"],
         intro=request_form["intro"],
@@ -32,7 +35,7 @@ def create_line_controller():
     db.session.add(new_line)
     db.session.commit()
 
-    response = Line.query.get(id).toDict()
+    response = Line.query.get(new_line_id).toDict()
     return jsonify(response)
 
 
@@ -60,9 +63,8 @@ def update_line_controller(line_id):
 
 
 def delete_line_controller(line_id):
-    Line.query.filter_by(id=line_id).delete()
+    Line.query.filter_by(line_id=line_id).delete()
     db.session.commit()
-
     return ('Line with Id "{}" deleted successfully!').format(line_id)
 
 
@@ -76,8 +78,11 @@ def list_all_stations_controller():
 
 def create_station_controller():
     request_form = request.form.to_dict()
-
+    stations = Station.query.all()
+    max_id = max(station.station_id for station in stations) if stations else 0
+    new_id = max_id + 1
     new_station = Station(
+        station_id=new_id,
         english_name=request_form["english_name"],
         chinese_name=request_form["chinese_name"],
         district=request_form["district"],
@@ -86,7 +91,7 @@ def create_station_controller():
     db.session.add(new_station)
     db.session.commit()
 
-    response = Station.query.get(id).toDict()
+    response = Station.query.get(new_id).toDict()
     return jsonify(response)
 
 
@@ -111,7 +116,7 @@ def update_station_controller(station_id):
 
 
 def delete_station_controller(station_id):
-    Station.query.filter_by(id=station_id).delete()
+    Station.query.filter_by(station_id=station_id).delete()
     db.session.commit()
 
     return ('Station with Id "{}" deleted successfully!').format(station_id)
