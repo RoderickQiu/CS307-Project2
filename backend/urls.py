@@ -172,3 +172,20 @@ def retrieve_online_person():
         return retrieve_online_person_controller()
     else:
         return "Method is Not Allowed"
+    
+# Bonus---------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
+# 多参数搜索乘⻋记录功能
+@app.route("/queryuser", methods=["POST"])  # /queryuser
+def query():
+    if request.method == "POST":
+        return query_user_controller()
+    else:
+        return "Method is Not Allowed"
+    
+@app.route("/querycard", methods=["POST"])  # /querycard
+def query_card():
+    if request.method == "POST":
+        return query_card_controller()
+    else:
+        return "Method is Not Allowed"

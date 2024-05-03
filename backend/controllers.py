@@ -1,6 +1,6 @@
 from flask import request, jsonify
-from sqlalchemy import func, Integer
-
+from sqlalchemy import func, Integer, or_
+from datetime import datetime
 from .app import db
 from .models import Line, Station, LineDetail, Users, Cards, CardRides, UserRides
 
@@ -611,3 +611,66 @@ def retrieve_user_rides_controller(user_id):
     for user_ride in user_rides:
         response.append(user_ride.toDict())
     return jsonify(response)
+
+def query_user_controller():
+    request_form = request.form.to_dict()
+    query = UserRides.query
+
+    if 'from_station' in request_form:
+        query = query.filter(UserRides.from_station == request_form['from_station'])
+
+    if 'to_station' in request_form:
+        query = query.filter(UserRides.to_station == request_form['to_station'])
+
+    if 'user_id' in request_form:
+        query = query.filter(UserRides.user_id == request_form['user_id'])
+
+    if 'on_the_ride' in request_form:
+        query = query.filter(UserRides.on_the_ride == request_form['on_the_ride'])
+    
+    if 'price' in request_form:
+        query = query.filter(UserRides.price == request_form['price'])
+    
+    if 'time' in request_form:
+        time = datetime.strptime(request_form['time'], '%Y-%m-%d %H:%M:%S')
+        query = query.filter(UserRides.start_time <= time, UserRides.end_time >= time)
+
+    user_rides = query.all()
+    response = []
+    for user_ride in user_rides:
+        response.append(user_ride.toDict())
+    if not response:
+        return jsonify({"error": "No matching user ride found."}), 404
+    return jsonify(response)
+
+def query_card_controller():
+    request_form = request.form.to_dict()
+    query = CardRides.query
+
+    if 'from_station' in request_form:
+        query = query.filter(CardRides.from_station == request_form['from_station'])
+
+    if 'to_station' in request_form:
+        query = query.filter(CardRides.to_station == request_form['to_station'])
+
+    if 'card_id' in request_form:
+        query = query.filter(CardRides.card_id == request_form['card_id'])
+
+    if 'on_the_ride' in request_form:
+        query = query.filter(CardRides.on_the_ride == request_form['on_the_ride'])
+    
+    if 'price' in request_form:
+        query = query.filter(CardRides.price == request_form['price'])
+
+    if 'time' in request_form:
+        time = datetime.strptime(request_form['time'], '%Y-%m-%d %H:%M:%S')
+        query = query.filter(CardRides.start_time <= time, CardRides.end_time >= time)
+
+    card_rides = query.all()
+    response = []
+    for card in card_rides:
+        response.append(card.toDict())
+    if not response:
+        return jsonify({"error": "No matching card found."}), 404
+    return jsonify(response)
+
