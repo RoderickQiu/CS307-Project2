@@ -80,6 +80,11 @@
 
 ### 本地配置
 
+我们均使用以下电脑配置：
+
+- MacBook Pro 14-inch 2021, Apple M1 Pro, 16GB RAM, 512GB SSD
+- macOS Monterey, Python 3.9, PostgreSQL 16
+
 #### 后端配置
 
 1. 按照`requirement.txt`中的版本安装 `Flask` `Flask_Migrate` `flask_sqlalchemy` `SQLAlchemy`等PyPi包。
@@ -136,13 +141,14 @@
 - 请求路径：`/lines/<line_id>/stations`
 - 请求方法：`GET`
 - 描述：获取指定线路上的所有车站。
+- 返回值：Lines的JSON数组。
 
 ##### 获取、添加或删除线路上的指定车站
 
 - 请求路径：`/lines/<line_id>/stations/<station_id>`
 - 请求方法：`GET`, `POST`, `DELETE`
 - 描述：
-  - 获取、添加或删除线路上的指定车站。在POST方法中，需要在Body字段中按照字典的格式添加每一个字段所对应的信息(`line_num`)。
+  - 获取、添加或删除线路上的指定车站。在POST方法中，需要在Body字段中按照字典的格式添加每一个字段所对应的信息（数字型`line_num`）。
   - 另外，对于POST方法，我们可以指定station_id为一个数组，从而可以一次放入多个车站，使用格式如`stations/[1,2,3]`，表示在在line_num位置先后添加station_id为1，2，3的三个车站。若只导入单个车站，使用`stations/1`格式即可。
 
 ##### 获取线路上指定车站的前后n个车站
@@ -300,7 +306,7 @@
 
 页面整体效果如下：
 
-| <img src="images/image-20240503221614656.png" alt="image-20240503221614656" style="zoom:50%;" /> | <img src="images/image-20240503221445766.png" alt="image-20240503221445766" style="zoom:50%;" /> |
+| <img src="images/image-20240503221614656.png" alt="image-20240503221614656" style="zoom:50%;" /> | <img src="images/image-20240503223545782.png" alt="image-20240503223545782" style="zoom: 67%;" /> |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 我们总结出该前端界面的以下特点，并因此认为这是一个具有良好效果的数据库应用系统管理界面：
