@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from sqlalchemy import func, Integer, or_, text
+from sqlalchemy import func, Integer, text, DateTime
 from datetime import datetime
 from .app import db
 from .app import app
@@ -624,31 +624,37 @@ def retrieve_user_rides_controller(user_id):
         response.append(user_ride.toDict())
     return jsonify(response)
 
+
 def query_user_controller():
     request_form = request.form.to_dict()
     query = UserRides.query
 
-    if 'business_carriage' in request_form:
-        query = query.filter(UserRides.business_carriage == request_form['business_carriage'])
+    if "business_carriage" in request_form:
+        query = query.filter(
+            UserRides.business_carriage == request_form["business_carriage"]
+        )
 
-    if 'from_station' in request_form:
-        query = query.filter(UserRides.from_station == request_form['from_station'])
+    if "from_station" in request_form:
+        query = query.filter(UserRides.from_station == request_form["from_station"])
 
-    if 'to_station' in request_form:
-        query = query.filter(UserRides.to_station == request_form['to_station'])
+    if "to_station" in request_form:
+        query = query.filter(UserRides.to_station == request_form["to_station"])
 
-    if 'user_id' in request_form:
-        query = query.filter(UserRides.user_id == request_form['user_id'])
+    if "user_id" in request_form:
+        query = query.filter(UserRides.user_id == request_form["user_id"])
 
-    if 'on_the_ride' in request_form:
-        query = query.filter(UserRides.on_the_ride == request_form['on_the_ride'])
-    
-    if 'price' in request_form:
-        query = query.filter(UserRides.price == request_form['price'])
-    
-    if 'time' in request_form:
-        time = datetime.strptime(request_form['time'], '%Y-%m-%d %H:%M:%S')
-        query = query.filter(UserRides.start_time <= time, UserRides.end_time >= time)
+    if "on_the_ride" in request_form:
+        query = query.filter(UserRides.on_the_ride == request_form["on_the_ride"])
+
+    if "price" in request_form:
+        query = query.filter(UserRides.price == request_form["price"])
+
+    if "time" in request_form:
+        time = datetime.strptime(request_form["time"], "%Y-%m-%dT%H:%M:%S")
+        query = query.filter(
+            func.cast(UserRides.start_time, DateTime) <= time,
+            func.cast(UserRides.end_time, DateTime) >= time,
+        )
 
     user_rides = query.all()
     response = []
@@ -658,31 +664,39 @@ def query_user_controller():
         return jsonify({"error": "No matching user ride found."}), 404
     return jsonify(response)
 
+
 def query_card_controller():
     request_form = request.form.to_dict()
     query = CardRides.query
 
-    if 'business_carriage' in request_form:
-        query = query.filter(CardRides.business_carriage == request_form['business_carriage'])
+    print(request_form)
 
-    if 'from_station' in request_form:
-        query = query.filter(CardRides.from_station == request_form['from_station'])
+    if "business_carriage" in request_form:
+        query = query.filter(
+            CardRides.business_carriage == request_form["business_carriage"]
+        )
 
-    if 'to_station' in request_form:
-        query = query.filter(CardRides.to_station == request_form['to_station'])
+    if "from_station" in request_form:
+        query = query.filter(CardRides.from_station == request_form["from_station"])
 
-    if 'card_id' in request_form:
-        query = query.filter(CardRides.card_id == request_form['card_id'])
+    if "to_station" in request_form:
+        query = query.filter(CardRides.to_station == request_form["to_station"])
 
-    if 'on_the_ride' in request_form:
-        query = query.filter(CardRides.on_the_ride == request_form['on_the_ride'])
-    
-    if 'price' in request_form:
-        query = query.filter(CardRides.price == request_form['price'])
+    if "card_id" in request_form:
+        query = query.filter(CardRides.card_id == request_form["card_id"])
 
-    if 'time' in request_form:
-        time = datetime.strptime(request_form['time'], '%Y-%m-%d %H:%M:%S')
-        query = query.filter(CardRides.start_time <= time, CardRides.end_time >= time)
+    if "on_the_ride" in request_form:
+        query = query.filter(CardRides.on_the_ride == request_form["on_the_ride"])
+
+    if "price" in request_form:
+        query = query.filter(CardRides.price == request_form["price"])
+
+    if "time" in request_form:
+        time = datetime.strptime(request_form["time"], "%Y-%m-%dT%H:%M:%S")
+        query = query.filter(
+            func.cast(CardRides.start_time, DateTime) <= time,
+            func.cast(CardRides.end_time, DateTime) >= time,
+        )
 
     card_rides = query.all()
     response = []
@@ -691,6 +705,7 @@ def query_card_controller():
     if not response:
         return jsonify({"error": "No matching card found."}), 404
     return jsonify(response)
+
 
 def read_user_read_controller():
     user_rides = UserRides.query.all()
@@ -706,19 +721,20 @@ def read_user_write_controller():
             "INSERT INTO lines (line_id, line_name, business_carriage, start_time, end_time, intro, mileage, color, first_opening, url) VALUES (:line_id, :line_name, :business_carriage, :start_time, :end_time, :intro, :mileage, :color, :first_opening, :url)"
         )
         params = {
-            'line_id': 17,
-            'line_name': "100号线",
-            'business_carriage': 0,
-            'start_time': "06:00",
-            'end_time': "23:59",
-            'intro': "100号线",
-            'mileage': "100",
-            'color': "red",
-            'first_opening': "2021-01-01",
-            'url': "https://www.baidu.com"
+            "line_id": 17,
+            "line_name": "100号线",
+            "business_carriage": 0,
+            "start_time": "06:00",
+            "end_time": "23:59",
+            "intro": "100号线",
+            "mileage": "100",
+            "color": "red",
+            "first_opening": "2021-01-01",
+            "url": "https://www.baidu.com",
         }
         conn.execute(stmt, params)
         return "Success", 201
+
 
 def write_user_read_controller():
     with app.write_engine.connect() as conn:
@@ -729,24 +745,23 @@ def write_user_read_controller():
             response.append(dict(row))
         return jsonify(response)
 
+
 def write_user_write_controller():
-     with app.write_engine.connect() as conn:
+    with app.write_engine.connect() as conn:
         stmt = text(
             "INSERT INTO lines (line_id, line_name, business_carriage, start_time, end_time, intro, mileage, color, first_opening, url) VALUES (:line_id, :line_name, :business_carriage, :start_time, :end_time, :intro, :mileage, :color, :first_opening, :url)"
         )
         params = {
-            'line_id': 17,
-            'line_name': "100号线",
-            'business_carriage': 0,
-            'start_time': "06:00",
-            'end_time': "23:59",
-            'intro': "100号线",
-            'mileage': "100",
-            'color': "red",
-            'first_opening': "2021-01-01",
-            'url': "https://www.baidu.com"
+            "line_id": 17,
+            "line_name": "100号线",
+            "business_carriage": 0,
+            "start_time": "06:00",
+            "end_time": "23:59",
+            "intro": "100号线",
+            "mileage": "100",
+            "color": "red",
+            "first_opening": "2021-01-01",
+            "url": "https://www.baidu.com",
         }
         conn.execute(stmt, params)
         return "Success", 201
-
-
