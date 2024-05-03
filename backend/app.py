@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from gevent.pywsgi import WSGIServer
 from gevent import monkey
+from sqlalchemy import create_engine
 
 monkey.patch_all()
 
@@ -18,7 +19,8 @@ def create_app(config_mode):
     app.config.from_object(config[config_mode])
     db.init_app(app)
     migrate.init_app(app, db)
-
+    app.read_engine = create_engine('postgresql://read_user:123456@localhost/project1')
+    app.write_engine = create_engine('postgresql://write_user:123456@localhost/project1')
     return app
 
 app = create_app(os.getenv("CONFIG_MODE"))

@@ -1,4 +1,6 @@
-from flask import request
+from flask import request, jsonify
+from sqlalchemy import text
+from functools import wraps
 
 from .app import app
 from .controllers import *
@@ -189,3 +191,25 @@ def query_card():
         return query_card_controller()
     else:
         return "Method is Not Allowed"
+    
+
+
+@app.route("/read_user", methods=["GET", "POST"])  # /read_user
+def read_user():
+    if request.method == "GET":
+        return read_user_read_controller()
+    if request.method == "POST":
+        return read_user_write_controller()
+    else:
+        return "Method is Not Allowed", 405
+
+@app.route("/write_user", methods=["GET", "POST"])  # /write_user
+def write_user():
+    if request.method == "GET":
+        return write_user_read_controller()
+    if request.method == "POST":
+        return write_user_write_controller()
+    else:
+        return "Method is Not Allowed", 405
+
+    

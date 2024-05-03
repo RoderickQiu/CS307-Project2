@@ -1,7 +1,8 @@
 from flask import request, jsonify
-from sqlalchemy import func, Integer, or_
+from sqlalchemy import func, Integer, or_, text
 from datetime import datetime
 from .app import db
+from .app import app
 from .models import Line, Station, LineDetail, Users, Cards, CardRides, UserRides
 
 
@@ -690,4 +691,62 @@ def query_card_controller():
     if not response:
         return jsonify({"error": "No matching card found."}), 404
     return jsonify(response)
+
+def read_user_read_controller():
+    user_rides = UserRides.query.all()
+    response = []
+    for user_ride in user_rides:
+        response.append(user_ride.toDict())
+    return jsonify(response)
+
+
+def read_user_write_controller():
+    with app.read_engine.connect() as conn:
+        stmt = text(
+            "INSERT INTO lines (line_id, line_name, business_carriage, start_time, end_time, intro, mileage, color, first_opening, url) VALUES (:line_id, :line_name, :business_carriage, :start_time, :end_time, :intro, :mileage, :color, :first_opening, :url)"
+        )
+        params = {
+            'line_id': 17,
+            'line_name': "100号线",
+            'business_carriage': 0,
+            'start_time': "06:00",
+            'end_time': "23:59",
+            'intro': "100号线",
+            'mileage': "100",
+            'color': "red",
+            'first_opening': "2021-01-01",
+            'url': "https://www.baidu.com"
+        }
+        conn.execute(stmt, params)
+        return "Success", 201
+
+def write_user_read_controller():
+    with app.write_engine.connect() as conn:
+        stmt = text("SELECT * FROM lines")
+        result = conn.execute(stmt)
+        response = []
+        for row in result:
+            response.append(dict(row))
+        return jsonify(response)
+
+def write_user_write_controller():
+     with app.write_engine.connect() as conn:
+        stmt = text(
+            "INSERT INTO lines (line_id, line_name, business_carriage, start_time, end_time, intro, mileage, color, first_opening, url) VALUES (:line_id, :line_name, :business_carriage, :start_time, :end_time, :intro, :mileage, :color, :first_opening, :url)"
+        )
+        params = {
+            'line_id': 17,
+            'line_name': "100号线",
+            'business_carriage': 0,
+            'start_time': "06:00",
+            'end_time': "23:59",
+            'intro': "100号线",
+            'mileage': "100",
+            'color': "red",
+            'first_opening': "2021-01-01",
+            'url': "https://www.baidu.com"
+        }
+        conn.execute(stmt, params)
+        return "Success", 201
+
 
