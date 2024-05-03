@@ -97,7 +97,6 @@ def list_all_stations_controller():
     page = int(
         request.args.get("page", 1)
     )  # for GET, use request.args instead of request.form
-
     offset = (page - 1) * elem_per_page
     stations = Station.query.order_by(Station.station_id).all()
     response = []
@@ -336,11 +335,22 @@ def get_n_station_on_line_controller(line_id, station_id, n):
 
 
 def list_all_users_controller():
+    elem_per_page = int(request.args.get("elem_per_page", 10))
+    page = int(
+        request.args.get("page", 1)
+    )  # for GET, use request.args instead of request.form
+    offset = (page - 1) * elem_per_page
     users = Users.query.all()
     response = []
-    for user in users:
+    for user in users[offset : offset + elem_per_page]:
         response.append(user.toDict())
-    return jsonify(response)
+    return jsonify(
+        {
+            "page": page,
+            "total": len(users),
+            "result": response,
+        }
+    )
 
 
 def create_user_controller():
@@ -360,11 +370,24 @@ def create_user_controller():
 
 
 def list_all_cards_controller():
+    elem_per_page = int(request.args.get("elem_per_page", 10))
+    page = int(
+        request.args.get("page", 1)
+    )  # for GET, use request.args instead of request.form
+    offset = (page - 1) * elem_per_page
     cards = Cards.query.all()
     response = []
-    for card in cards:
+
+    for card in cards[offset : offset + elem_per_page]:
         response.append(card.toDict())
-    return jsonify(response)
+
+    return jsonify(
+        {
+            "page": page,
+            "total": len(cards),
+            "result": response,
+        }
+    )
 
 
 def create_card_controller():
@@ -569,6 +592,22 @@ def retrieve_online_person_controller():
     response = []
     for card_ride in card_rides:
         response.append(card_ride.toDict())
+    for user_ride in user_rides:
+        response.append(user_ride.toDict())
+    return jsonify(response)
+
+
+def retrieve_card_rides_controller(card_number):
+    card_rides = CardRides.query.filter_by(card_id=card_number).all()
+    response = []
+    for card_ride in card_rides:
+        response.append(card_ride.toDict())
+    return jsonify(response)
+
+
+def retrieve_user_rides_controller(user_id):
+    user_rides = UserRides.query.filter_by(user_id=user_id).all()
+    response = []
     for user_ride in user_rides:
         response.append(user_ride.toDict())
     return jsonify(response)

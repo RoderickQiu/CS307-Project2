@@ -139,6 +139,13 @@ def retrieve_destroy_card_ride(ride_id):
     else:
         return "Method is Not Allowed"
 
+@app.route("/card_rides/card/<card_number>", methods=["GET"])  # /card_ride/card/1
+def retrieve_card_rides(card_number):
+    if request.method == "GET":
+        return retrieve_card_rides_controller(card_number)
+    else:
+        return "Method is Not Allowed"
+
 
 @app.route("/user_rides/<ride_id>", methods=["GET", "DELETE", "PUT"])  # /user_ride/1
 def retrieve_destroy_user_ride(ride_id):
@@ -148,6 +155,13 @@ def retrieve_destroy_user_ride(ride_id):
         return delete_user_ride_controller(ride_id)
     if request.method == "PUT":
         return update_user_ride_controller(ride_id)
+    else:
+        return "Method is Not Allowed"
+
+@app.route("/user_rides/user/<user_id>", methods=["GET"])  # /user_ride/user/1
+def retrieve_user_rides(user_id):
+    if request.method == "GET":
+        return retrieve_user_rides_controller(user_id)
     else:
         return "Method is Not Allowed"
 

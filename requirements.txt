@@ -1,5 +1,9 @@
 Flask==3.0.3
+Flask_Cors==4.0.0
 Flask_Migrate==4.0.7
 flask_sqlalchemy==3.1.1
+gevent==23.9.0.post1
+pyobjc_framework_Cocoa==10.2
+setuptools==69.2.0
 SQLAlchemy==2.0.29
-flask-cors==4.0.0
+typing_extensions==4.11.0

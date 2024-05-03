@@ -75,7 +75,16 @@ Spring 2024.
 
 - 请求路径：`/users`
 - 请求方法：`GET`, `POST`
-- 描述：获取所有用户的列表或创建新的用户。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`user_id_number` `name` `phone` `gender` `district`)
+- 描述：
+  - 获取所有用户的列表或创建新的用户。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`user_id_number` `name` `phone` `gender` `district`)
+  - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值为这样的形式：
+      ```
+      {
+        "page": "1",
+        "total": "2000",
+        "result": { RESPONSE }
+      }
+      ```
 
 #### 卡操作
 
@@ -83,7 +92,16 @@ Spring 2024.
 
 - 请求路径：`/cards`
 - 请求方法：`GET`, `POST`
-- 描述：获取所有卡的列表或创建新的卡。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息(`card_number` `money` `create_time`)
+- 描述：
+  - 获取所有卡的列表或创建新的卡。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息(`card_number` `money` `create_time`)
+  - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值为这样的形式：
+      ```
+      {
+        "page": "1",
+        "total": "2000",
+        "result": { RESPONSE }
+      }
+      ```
 
 #### 卡行程操作
 
@@ -98,6 +116,12 @@ Spring 2024.
 - 请求路径：`/card_rides/<ride_id>`
 - 请求方法：`GET`, `PUT`, `DELETE`
 - 描述：获取、更新或删除指定ID的卡行程。对于PUT方法（下车），需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`to_station` `end_time`)
+- 
+##### 获取指定卡的所有行程
+
+- 请求路径：`/card_rides/card/<card_id>`
+- 请求方法：`GET`
+- 描述：获取指定卡的所有行程。
 
 #### 用户行程操作
 
@@ -106,6 +130,12 @@ Spring 2024.
 - 请求路径：`/user_rides`
 - 请求方法：`GET`, `POST`
 - 描述：获取所有用户行程的列表或创建新的用户行程。对于POST方法(上车)，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`user_id` `from_station` `start_time`)
+
+##### 获取指定用户的所有行程
+
+- 请求路径：`/user_rides/user/<user_id>`
+- 请求方法：`GET`
+- 描述：获取指定用户的所有行程。
 
 ##### 获取、更新或删除指定用户行程
 
