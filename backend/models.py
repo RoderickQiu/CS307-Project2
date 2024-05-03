@@ -1,6 +1,6 @@
 from sqlalchemy import inspect
 
-from . import db  # from __init__.py
+from .app import db  # from __init__.py
 
 
 class LineDetail(db.Model):

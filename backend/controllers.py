@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from sqlalchemy import func, Integer
 
-from . import db
+from .app import db
 from .models import Line, Station, LineDetail, Users, Cards, CardRides, UserRides
 
 
