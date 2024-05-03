@@ -40,11 +40,8 @@
 ├── frontend
 │   ├── index.html
 │   ├── jsconfig.json
-│   ├── package-lock.json
 │   ├── package.json
 │   ├── postcss.config.js
-│   ├── public
-│   │   └── favicon.ico
 │   ├── src
 │   │   ├── App.vue
 │   │   ├── assets
@@ -199,7 +196,17 @@
 
 #### MySQL数据库配置
 
-#### 更多功能
+在生成Postgres数据库DDL的同时，我们学习MySQL的DDL语法，并同步制作了一个MySQL的数据库副本。
+
+由于我们使用了SQLAlchemy库来通过ORM方式访问数据库，我们使用了pymysql的连接器来替代用于Postgres的psycopg2连接器，便捷地实现了MySQL数据库的支持。
+
+具体使用时，仅需要在`/backend/.env`文件中，修改`DEVELOPMENT_DATABASE_URL`为`mysql+pymysql://<username>:<password>@<host>:<port>/<database>`，即可实现MySQL切换，实现一套代码、两个数据库系统皆可用。
+
+#### 更多API功能
+
+我们另多实现了几种API设计，完成了更多的系统功能需求。
+
+另外，由于部分数据量较大，为了提升访问效率，我们采用了分页输出的形式，较好地优化了性能，具体详见以下描述。
 
 1. **地铁站状态**：增加并合理使用地铁站状态，例如：建设中、运营中、关闭中等。
     - 在`/stations`中增加`status`字段，表示地铁站状态。
@@ -264,43 +271,65 @@
 
 #### 封装并实现⼀个真正的后端服务器
 1. **ORM映射**：
-    - 使用SQLAlchemy实现ORM映射，将数据库表格映射为Python类，实现对数据库的操作。
-    - 在`/backend/models.py`中定义了`Line` `Station` `User` `Card` `CardRide` `UserRide`等类，分别对应数据库中的表格。
+    - 使用SQLAlchemy实现ORM映射，将数据库表格映射为Python类，实现对数据库的操作；这也便利了Postgres和MySQL的自如切换。
+    - 在`/backend/models.py`中定义了`Line`、 `Station`、 `User`、 `Card`、 `CardRide`、 `UserRide`等类，分别对应数据库中的各个表格。
     - 在`/backend/controllers.py`中实现了对数据库的增删改查操作。
 2. **连接池**：
     - 使用SQLAlchemy实现连接池，提高数据库的访问效率。
     - 在`/backend/config.py`中配置了数据库连接字符串，实现了连接池。
-3. **Flask后端框架**：
+3. **Flask后端框架封装**：
     - 使用Flask框架实现后端服务器，实现了对请求的响应。
     - 在`/backend/app.py`中实现了Flask应用程序的主要运行逻辑。
 4. **代码包管理**：
-    - 使用Python的包管理工具，将代码封装为包，方便管理。
-    - 在`/backend/__init__.py`中实现了包的初始化。
-5. **套接字编程**：
+    1. 后端层面
+        1. 使用Python的包管理工具，将代码封装为包，方便管理。
+        2. 在`/backend/__init__.py`中实现了包的初始化。
+
+    2. 前端层面
+        1. 使用NPM/Yarn进行包管理，较好地实现了代码复用。
+
+5. **套接字编程和RESTFul API支持**：
     - 使用Flask框架实现了套接字编程，实现了对请求的响应。
+    - 通信范式按照`RESTFul API`规范进行设计，确保了设计的通用性、规范性和可扩展性。
+      - 通过`PUT`、`GET`、`POST`、`DELETE`的指令和FormData参数传送，实现了API的良好实现。
     - 在`/backend/app.py`中实现了Flask应用程序的主要运行逻辑。
 
 #### 页面显示设计
 
+我们实现了一个优雅、实用性强、代码规范的网页界面，基于Vue开发。
+
+页面整体效果如下：
+
+| <img src="images/image-20240503221614656.png" alt="image-20240503221614656" style="zoom:50%;" /> | <img src="images/image-20240503221445766.png" alt="image-20240503221445766" style="zoom:50%;" /> |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+
+我们总结出该前端界面的以下特点，并因此认为这是一个具有良好效果的数据库应用系统管理界面：
+
+1. **基于包管理的现代开发方式**，使用了Vite、Vue、Tailwind、ElementPlus、Axios、DayJS等流行的NPM库，使得代码可读性强、实现效果流畅。
+2. **支持后端API的所有功能**，可以很好的进行展示和测试。
+3. **是一套完整、自洽的系统，使用流畅**，包含各种主要数据结构的列表展示和操作，并考虑到了多处的性能优化，使得只需要使用这套系统，就可以快速完整执行所有操作。
+4. **美观优雅、风格统一，自定义程度高**，整体使用ElementPlus统一设计风格，并通过GoldenLayout实现多个界面的自由组织。
+
 #### 合理使用数据库用户权限以及触发器
+
 1. **用户权限**：
     - 使用Postgres实现用户权限的配置，限制用户对数据库的访问权限。
     - 首先在Postgres中执行以下代码
         ```sql
-        #CREATE USER read_user WITH PASSWORD '123456';
-        #GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_user;
-        #CREATE USER write_user WITH PASSWORD '123456';
-        #GRANT ALL PRIVILEGES ON DATABASE project1 TO write_user;
-        #GRANT INSERT ON lines TO write_user;
-        #GRANT UPDATE ON lines TO write_user;
-        #GRANT DELETE ON lines TO write_user;
+        CREATE USER read_user WITH PASSWORD '123456';
+        GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_user;
+        CREATE USER write_user WITH PASSWORD '123456';
+        GRANT ALL PRIVILEGES ON DATABASE project1 TO write_user;
+        GRANT INSERT ON lines TO write_user;
+        GRANT UPDATE ON lines TO write_user;
+        GRANT DELETE ON lines TO write_user;
         ```
     - 在`/backend/config.py`中配置了数据库连接字符串，实现了用户权限的配置。
     - 在`/backend/app.py` 中利用`SQLAlchemy`配置了数据库连接字符串，实现了用户权限的配置。
-    ```python
-     app.read_engine = create_engine('postgresql://read_user:123456@localhost/project1')
-     app.write_engine = create_engine('postgresql://write_user:123456@localhost/project1')
-    ```
+        ```python
+        app.read_engine = create_engine('postgresql://read_user:123456@localhost/project1')
+        app.write_engine = create_engine('postgresql://write_user:123456@localhost/project1')
+        ```
     - 在`/backend/controllers.py`中实现了对数据库的增删改查操作，实现了用户权限的配置。
     - 我们定义了两个路由`/read_user`和`/write_user`，分别用于读取和写入用户数据。
     - 对于`/read_user`路由，我们在GET请求中调用`read_user_read_controller()`函数来读取用户数据，而在POST请求中调用`read_user_write_controller()`函数来写入用户数据。
@@ -329,7 +358,7 @@
     def default_business_carriage(mapper, connection, target):
         if target.business_carriage is None:
             target.business_carriage = 0
-
+    
     event.listen(Line, 'before_insert', Line.default_business_carriage)
     ```
 
@@ -339,8 +368,7 @@
     def default_status(mapper, connection, target):
         if target.status is None:
             target.status = 'opening'
-
+    
     event.listen(Station, 'before_insert', Station.default_status)
     ```
     - 这种方法的优点是，我们可以在不改变数据库结构的情况下，对数据进行预处理和验证，提高了数据的一致性和完整性。
-    
