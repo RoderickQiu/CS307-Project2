@@ -192,7 +192,12 @@ def query_card():
     else:
         return "Method is Not Allowed"
     
-
+# 在进行用户权限测试之前，需要先在数据库中创建两个用户，分别为read_user和write_user, 在数据库中执行以下命令：
+#CREATE USER read_user WITH PASSWORD '123456';
+#GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_user;
+#CREATE USER write_user WITH PASSWORD '123456';
+#GRANT ALL PRIVILEGES ON DATABASE project1 TO write_user;
+#GRANT INSERT ON lines TO write_user;
 
 @app.route("/read_user", methods=["GET", "POST"])  # /read_user
 def read_user():

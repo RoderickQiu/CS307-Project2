@@ -14,13 +14,13 @@ Spring 2024.
 
 - 请求路径：`/lines`
 - 请求方法：`GET`, `POST`
-- 描述：获取所有线路的列表或创建新的线路。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`line_name` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
+- 描述：获取所有线路的列表或创建新的线路。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`line_name` `business_carriage` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
 
 ##### 获取、更新或删除指定线路
 
 - 请求路径：`/lines/<line_id>`
 - 请求方法：`GET`, `PUT`, `DELETE`
-- 描述：获取、更新或删除指定ID的线路。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`line_name` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
+- 描述：获取、更新或删除指定ID的线路。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`line_name` `business_carriage` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
 
 #### 车站操作
 
@@ -29,7 +29,7 @@ Spring 2024.
 - 请求路径：`/stations`
 - 请求方法：`GET`, `POST`
 - 描述：获取所有车站的列表或创建新的车站。
-  - 对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`English_name` `Chinese_name` `District` `Introduction`)
+  - 对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息, Status字段包括三个状态`opening` `closed` `under`。(`English_name` `Chinese_name` `District` `Status` `Introduction`)
   - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值为这样的形式：
       ```
       {
@@ -43,7 +43,7 @@ Spring 2024.
 
 - 请求路径：`/stations/<station_id>`
 - 请求方法：`GET`, `PUT`, `DELETE`
-- 描述：获取、更新或删除指定ID的车站。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`English_name` `Chinese_name` `District` `Introduction`)
+- 描述：获取、更新或删除指定ID的车站。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。, Status字段包括三个状态`opening` `closed` `under`。(`English_name` `Chinese_name` `District` `Status` `Introduction`)
 
 #### 线路和车站操作
 
@@ -109,7 +109,7 @@ Spring 2024.
 
 - 请求路径：`/card_rides`
 - 请求方法：`GET`, `POST`
-- 描述：获取所有卡行程的列表或创建新的卡行程。对于POST方法(上车)，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`card_id` `from_station` `start_time`)
+- 描述：获取所有卡行程的列表或创建新的卡行程。对于POST方法(上车)，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`card_id` `from_station` `start_time` `business_carriage`)
 
 ##### 获取、更新或删除指定卡行程
 
@@ -129,7 +129,7 @@ Spring 2024.
 
 - 请求路径：`/user_rides`
 - 请求方法：`GET`, `POST`
-- 描述：获取所有用户行程的列表或创建新的用户行程。对于POST方法(上车)，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`user_id` `from_station` `start_time`)
+- 描述：获取所有用户行程的列表或创建新的用户行程。对于POST方法(上车)，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`user_id` `from_station` `start_time` `business_carriage`)
 
 ##### 获取指定用户的所有行程
 
