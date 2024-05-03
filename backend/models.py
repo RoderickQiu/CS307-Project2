@@ -1,4 +1,5 @@
 from sqlalchemy import inspect
+from sqlalchemy import event
 
 from .app import db  # from __init__.py
 
@@ -37,6 +38,14 @@ class Line(db.Model):
 
     def toDict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+    
+    @staticmethod
+    def default_business_carriage(mapper, connection, target):
+        if target.business_carriage is None:
+            target.business_carriage = 0
+
+event.listen(Line, 'before_insert', Line.default_business_carriage)
+
 
 
 class Station(db.Model):
@@ -53,6 +62,13 @@ class Station(db.Model):
 
     def toDict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+    
+    @staticmethod
+    def default_status(mapper, connection, target):
+        if target.status is None:
+            target.status = 'opening'
+
+event.listen(Station, 'before_insert', Station.default_status)
 
 class Users(db.Model):
     __tablename__ = "users"

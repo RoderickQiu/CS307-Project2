@@ -13,7 +13,7 @@ from .models import Line, Station, LineDetail, Users, Cards, CardRides, UserRide
 def list_all_lines_controller():
     lines = Line.query.order_by(
         func.cast(
-            func.unnest(func.regexp_matches(Line.line_name, "^\D*(\d+)\D*|$")).label(
+            func.unnest(func.regexp_matches(Line.line_name, "^\\D*(\\d+)\\D*|$")).label(
                 "number"
             ),
             Integer,
@@ -30,11 +30,11 @@ def create_line_controller():
     lines = Line.query.all()
     max_line_id = max(line.line_id for line in lines) if lines else 0
     new_line_id = max_line_id + 1
-
+    business_carriage = request_form.get("business_carriage", 0)
     new_line = Line(
         line_id=new_line_id,
         line_name=request_form["line_name"],
-        bussiness_carriage=request_form["bussiness_carriage"],
+        business_carriage=business_carriage,
         start_time=request_form["start_time"],
         end_time=request_form["end_time"],
         intro=request_form["intro"],
@@ -64,9 +64,9 @@ def retrieve_line_controller(line_id):
 def update_line_controller(line_id):
     request_form = request.form.to_dict()
     line = Line.query.get(line_id)
-
+    business_carriage = request_form.get("business_carriage", 0)
     line.line_name = request_form["line_name"]
-    line.bussiness_carriage = request_form["bussiness_carriage"]
+    line.business_carriage = business_carriage
     line.start_time = request_form["start_time"]
     line.end_time = request_form["end_time"]
     line.intro = request_form["intro"]
@@ -118,12 +118,13 @@ def create_station_controller():
     stations = Station.query.all()
     max_id = max(station.station_id for station in stations) if stations else 0
     new_id = max_id + 1
+    status = request_form.get("status", "opening")
     new_station = Station(
         station_id=new_id,
         english_name=request_form["english_name"],
         chinese_name=request_form["chinese_name"],
         district=request_form["district"],
-        status=request_form["status"],
+        status=status,
         introduction=request_form["introduction"],
     )
     db.session.add(new_station)
@@ -149,11 +150,11 @@ def retrieve_station_controller(station_id):
 def update_station_controller(station_id):
     request_form = request.form.to_dict()
     station = Station.query.get(station_id)
-
+    status = request_form.get("status", "opening")
     station.english_name = request_form["english_name"]
     station.chinese_name = request_form["chinese_name"]
     station.district = request_form["district"]
-    station.status = request_form["status"]
+    station.status = status
     station.introduction = request_form["introduction"]
 
     db.session.commit()
