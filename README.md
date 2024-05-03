@@ -1,6 +1,46 @@
-# CS307-Project2
+# CS307 Project2
+#### 小组成员：陈明志 12211414，邱天润 12210829
 
-Spring 2024.
+> 源码托管于 GitHub，将在项目 ddl 结束后基于 **MIT License** 协议开源，访问链接：
+>
+> https://github.com/RoderickQiu/CS307-Project2
+
+------
+
+### 成员分工及贡献百分比
+
+陈明志：
+
+- Backend Flask的实现
+- 通过 Sqlalchemy 实现`connection pool` `trigger`以及用户权限的配置
+
+邱天润：
+
+- 
+
+贡献百分比**相同，均为 50%**。
+
+### 项目源码文件夹结构：
+
+```shell
+├─ backend
+│  ├─ __init__.py
+│  ├─ config.py
+│  ├─ controllers.py
+│  ├─ models.py
+│  └─ urls.py
+├── frontend
+├── Data_process
+│   └─ Process.py
+```
+
+- [\_\_init\_\_.py](backend/__init__.py): 使得改文件夹被识别为一个Python包
+- [app.py](backend/app.py): 
+- [config.py](backend/config.py): 
+- [controllers.py](backend/controllers.py): 
+- [models.py](backend/models.py): 
+- [urls.py](backend/urls.py): 
+- [Process.py](Data_process/Process.py): 
 
 ## 使用指南:
 ### 本地配置
