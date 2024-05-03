@@ -283,4 +283,64 @@
 #### 页面显示设计
 
 #### 合理使用数据库用户权限以及触发器
-  
+1. **用户权限**：
+    - 使用Postgres实现用户权限的配置，限制用户对数据库的访问权限。
+    - 首先在Postgres中执行以下代码
+        ```sql
+        #CREATE USER read_user WITH PASSWORD '123456';
+        #GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_user;
+        #CREATE USER write_user WITH PASSWORD '123456';
+        #GRANT ALL PRIVILEGES ON DATABASE project1 TO write_user;
+        #GRANT INSERT ON lines TO write_user;
+        #GRANT UPDATE ON lines TO write_user;
+        #GRANT DELETE ON lines TO write_user;
+        ```
+    - 在`/backend/config.py`中配置了数据库连接字符串，实现了用户权限的配置。
+    - 在`/backend/app.py` 中利用`SQLAlchemy`配置了数据库连接字符串，实现了用户权限的配置。
+    ```python
+     app.read_engine = create_engine('postgresql://read_user:123456@localhost/project1')
+     app.write_engine = create_engine('postgresql://write_user:123456@localhost/project1')
+    ```
+    - 在`/backend/controllers.py`中实现了对数据库的增删改查操作，实现了用户权限的配置。
+    - 我们定义了两个路由`/read_user`和`/write_user`，分别用于读取和写入用户数据。
+    - 对于`/read_user`路由，我们在GET请求中调用`read_user_read_controller()`函数来读取用户数据，而在POST请求中调用`read_user_write_controller()`函数来写入用户数据。
+    - 对于`/write_user`路由，我们在GET请求中调用`write_user_read_controller()`函数来读取用户数据，而在POST请求中调用`write_user_write_controller()`函数来写入用户数据。
+    - 如果接收到的请求方法不是GET或POST，我们将返回"Method is Not Allowed"的错误信息和405状态码。
+    - 测试时，你可以使用工具（如Postman）来发送GET或POST请求，查看返回的结果是否符合预期。
+    - 根据测试结果来看，我们成功地实现了用户权限的配置，限制了用户对数据库的访问权限。
+
+<table>
+  <tr>
+    <td><img src="./Images/用户权限1.png" alt="用户权限1"></td>
+    <td><img src="./Images/用户权限2.png" alt="用户权限2"></td>
+  </tr>
+  <tr>
+    <td><img src="./Images/用户权限3.png" alt="用户权限3"></td>
+    <td><img src="./Images/用户权限4.png" alt="用户权限4"></td>
+  </tr>
+</table>
+
+2. **触发器**：
+    - 我们使用SQLAlchemy的事件监听功能来实现触发器，对数据库的操作进行自动化处理。具体来说，我们在插入新的`Line`或`Station`记录之前，设置了一些默认值。
+
+    - 对于`Line`模型，我们在插入新的线路记录之前，如果没有指定`business_carriage`（商务车厢），则默认为`0`。这是通过`before_insert`事件监听器和`default_business_carriage`静态方法实现的。代码如下：
+    ```python
+    @staticmethod
+    def default_business_carriage(mapper, connection, target):
+        if target.business_carriage is None:
+            target.business_carriage = 0
+
+    event.listen(Line, 'before_insert', Line.default_business_carriage)
+    ```
+
+    - 对于`Station`模型，我们在插入新的站点记录之前，如果没有指定`status`（站点状态），则默认为`opening`。这是通过`before_insert`事件监听器和`default_status`静态方法实现的。代码如下：
+    ```python
+    @staticmethod
+    def default_status(mapper, connection, target):
+        if target.status is None:
+            target.status = 'opening'
+
+    event.listen(Station, 'before_insert', Station.default_status)
+    ```
+    - 这种方法的优点是，我们可以在不改变数据库结构的情况下，对数据进行预处理和验证，提高了数据的一致性和完整性。
+    
