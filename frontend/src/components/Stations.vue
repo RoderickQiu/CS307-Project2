@@ -1,13 +1,15 @@
 <script setup>
 import axios from "axios";
 import {h, ref} from "vue";
-import {truncate} from "../util.js";
+import {firstLetterUppercase, truncate} from "../util.js";
 import dayjs from "dayjs";
 import {ElMessage, ElMessageBox} from "element-plus";
+import {first} from "lodash-es";
 
 const dialogVisible = ref(false), dialogMode = ref('add'), moreDialogVisible = ref(false);
 const loading = ref(false), page = ref(1), page_count = ref(1), elem_per_page = ref(20), total = ref(0);
-const station_id = ref(''), english_name = ref(''), chinese_name = ref(''), district = ref(''), introduction = ref('');
+const station_id = ref(''), english_name = ref(''), chinese_name = ref(''), district = ref(''), introduction = ref(''),
+    status = ref('opening');
 const selectedLine = ref(''), selectedOperation = ref(''), operationVal = ref(''), operationVal2 = ref('');
 
 const data = ref([]), dataLines = ref([]), dataStationsOnLine = ref([]);
@@ -31,6 +33,11 @@ const columns = [
     {
         title: 'Introduction',
         data_key: 'introduction',
+        isSpecial: true
+    },
+    {
+        title: 'Status',
+        data_key: 'status',
         isSpecial: true
     }
 ];
@@ -182,6 +189,7 @@ function submitStationDialog() {
     form.append('chinese_name', chinese_name.value);
     form.append('district', district.value);
     form.append('introduction', introduction.value);
+    form.append('status', status.value);
 
     if (dialogMode.value === 'edit') {
         axios({
@@ -213,6 +221,7 @@ function editStation(row) {
     chinese_name.value = row['chinese_name'];
     district.value = row['district'];
     introduction.value = row['introduction'];
+    status.value = row['status'];
 
     dialogVisible.value = true;
     dialogMode.value = 'edit';
@@ -224,6 +233,7 @@ function addStation() {
     chinese_name.value = '';
     district.value = '';
     introduction.value = '';
+    status.value = 'opening';
 
     dialogVisible.value = true;
     dialogMode.value = 'add';
@@ -240,6 +250,19 @@ function fetchStationsOnLine(lineId) {
         console.log(error);
         ElMessage.error(error);
     });
+}
+
+function getStatusText(status) {
+    switch (status) {
+        case 'opening':
+            return 'Opening';
+        case 'under':
+            return 'Under construction';
+        case 'closed':
+            return 'Closed';
+        default:
+            return 'Unknown';
+    }
 }
 </script>
 
@@ -301,6 +324,7 @@ function fetchStationsOnLine(lineId) {
                             <p>{{ row['introduction'] }}</p>
                         </template>
                     </el-popover>
+                    <span v-else-if="col.data_key === 'status'">{{ getStatusText(row['status']) }}</span>
                 </template>
             </el-table-column>
             <el-table-column width="160px" label="Operations">
@@ -389,6 +413,23 @@ function fetchStationsOnLine(lineId) {
             </el-form-item>
             <el-form-item label="Chinese Name">
                 <el-input v-model="chinese_name" placeholder="Chinese Name"></el-input>
+            </el-form-item>
+            <el-form-item label="Status">
+                <el-dropdown>
+                    <span class="el-button w-full">{{ getStatusText(status) }}
+                      <el-icon class="el-icon--right">
+                        <arrow-down/>
+                      </el-icon>
+                    </span>
+                    <template #dropdown>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item @click="status = 'opening'">Opening</el-dropdown-item>
+                            <el-dropdown-item @click="status = 'under'">Under construction
+                            </el-dropdown-item>
+                            <el-dropdown-item @click="status = 'closed'">Closed</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
             </el-form-item>
             <el-form-item label="District">
                 <el-dropdown>

@@ -4,6 +4,7 @@ import {defaultLayoutConfig, GoldenLayout} from "@/components/golden/index.js";
 import Lines from "@/components/Lines.vue";
 import Stations from "@/components/Stations.vue";
 import interact from "interactjs";
+import Cards from "@/components/Cards.vue";
 
 const GLayoutRoot = ref();
 
@@ -37,7 +38,7 @@ interact('.el-dialog')
         </template>
 
         <template v-slot:cards>
-            Cards
+            <Cards/>
         </template>
     </golden-layout>
 </template>

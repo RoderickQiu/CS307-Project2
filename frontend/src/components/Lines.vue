@@ -7,7 +7,7 @@ import {ElMessage} from "element-plus";
 
 const dialogVisible = ref(false), dialogMode = ref('add'), loading = ref(false);
 const line_name = ref(''), start_time = ref(''), end_time = ref(''), intro = ref(''), mileage = ref(''),
-    color = ref(''), first_opening = ref(''), url = ref(''), line_id = ref('')
+    color = ref(''), first_opening = ref(''), url = ref(''), line_id = ref(''), business_carriage = ref(false);
 
 const columns = [
     {
@@ -25,7 +25,11 @@ const columns = [
     {
         title: 'End Time',
         data_key: 'end_time',
-
+    },
+    {
+        title: 'Business',
+        data_key: 'business_carriage',
+        isSpecial: true
     },
     {
         title: 'Intro',
@@ -96,6 +100,7 @@ function submitLineDialog() {
     form.append('color', color.value);
     form.append('first_opening', dayjs(first_opening.value).format('YYYY-MM-DD'));
     form.append('url', url.value);
+    form.append('business_carriage', business_carriage.value ? 1 : 0);
 
     if (dialogMode.value === 'edit') {
         axios({
@@ -131,6 +136,7 @@ function editLine(row) {
     color.value = row['color'];
     first_opening.value = dayjs(row['first_opening']).format('YYYY-MM-DD');
     url.value = row['url'];
+    business_carriage.value = row['business_carriage'] === 1;
 
     dialogVisible.value = true;
     dialogMode.value = 'edit';
@@ -145,6 +151,7 @@ function addLine() {
     color.value = '';
     first_opening.value = '';
     url.value = '';
+    business_carriage.value = false;
 
     dialogVisible.value = true;
     dialogMode.value = 'add';
@@ -165,6 +172,9 @@ function addLine() {
             </el-form-item>
             <el-form-item label="Intro">
                 <el-input v-model="intro"/>
+            </el-form-item>
+            <el-form-item label="Business Carriage">
+                <el-switch v-model="business_carriage"/>
             </el-form-item>
             <el-form-item label="Mileage">
                 <el-input-number v-model="mileage"/>
@@ -235,6 +245,10 @@ function addLine() {
                     <span v-else-if="col.data_key === 'first_opening'">{{
                             dayjs(row['first_opening']).format('YYYY-MM-DD')
                         }}</span>
+                    <span v-else-if="col.data_key === 'business_carriage'">{{
+                            row['business_carriage'] === 1 ? 'Yes' : 'No'
+                        }}</span>
+                    <span v-else>{{ row[col.data_key] }}</span>
                 </template>
             </el-table-column>
             <el-table-column width="160px" label="Operations">
