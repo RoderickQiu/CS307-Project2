@@ -206,6 +206,47 @@ def delete_station_from_line_controller(line_id, station_id):
     )
 
 
+def add_multiple_stations_to_line_controller(line_id, station_ids):
+    request_form = request.form.to_dict()
+    position = int(request_form["line_num"])
+
+    for station_id in station_ids:
+        line_detail = LineDetail.query.filter_by(
+            line_id=line_id, station_id=station_id
+        ).first()
+        if line_detail is not None:
+            return (
+                jsonify({"error": "Station already exists in the Line, abort!"}),
+                400,
+            )
+
+    # Update the line_num of the following stations
+    following_stations = LineDetail.query.filter_by(line_id=line_id).filter(
+        LineDetail.line_num >= position
+    )
+    for following_station in following_stations:
+        following_station.line_num += len(station_ids)
+
+    # Add the new stations to the line
+    for station_id in station_ids:
+        new_line_detail = LineDetail(
+            line_id=line_id, station_id=station_id, line_num=position
+        )
+        db.session.add(new_line_detail)
+        position += 1
+
+    db.session.commit()
+
+    response = []
+    for station_id in station_ids:
+        response.append(
+            LineDetail.query.filter_by(line_id=line_id, station_id=station_id)
+            .first()
+            .toDict()
+        )
+    return jsonify(response)
+
+
 def add_station_to_line_controller(line_id, station_id):
     request_form = request.form.to_dict()
     position = int(request_form["line_num"])
@@ -214,7 +255,10 @@ def add_station_to_line_controller(line_id, station_id):
         line_id=line_id, station_id=station_id
     ).first()
     if line_detail is not None:
-        return "Station already exists in the Line, abort!"
+        return (
+            jsonify({"error": "Station already exists in the Line, abort!"}),
+            400,
+        )
     else:
         # Update the line_num of the following stations
         following_stations = LineDetail.query.filter_by(line_id=line_id).filter(
@@ -245,7 +289,12 @@ def list_stations_on_line_controller(line_id):
     )
     response = []
     for line_detail in line_details:
-        response.append(line_detail.toDict())
+        station = Station.query.get(line_detail.station_id)
+        dict = station.toDict()
+        dict["line_num"] = line_detail.line_num
+        response.append(dict)
+
+    response = sorted(response, key=lambda x: x["line_num"])
     return jsonify(response)
 
 
@@ -256,7 +305,10 @@ def get_station_on_line_controller(line_id, station_id):
     if line_detail is not None:
         return jsonify(line_detail.toDict())
     else:
-        return "Station not found in the Line!"
+        return (
+            jsonify({"error": "Station not found on line!"}),
+            404,
+        )
 
 
 def get_n_station_on_line_controller(line_id, station_id, n):
@@ -272,9 +324,15 @@ def get_n_station_on_line_controller(line_id, station_id, n):
         if n_station is not None:
             return jsonify(n_station.toDict())
         else:
-            return "Station not found in the Line!"
+            return (
+                jsonify({"error": "Station not found on line!"}),
+                404,
+            )
     else:
-        return "Station not found in the Line!"
+        return (
+            jsonify({"error": "Station not found on line!"}),
+            404,
+        )
 
 
 def list_all_users_controller():

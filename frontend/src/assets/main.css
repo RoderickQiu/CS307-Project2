@@ -58,3 +58,27 @@ html, body {
 .el-date-editor.el-input, .el-input-number, .el-dropdown {
     width: 100%;
 }
+
+.operation-input {
+    width: calc(100% - 80px);
+}
+
+.operation-btn {
+    width: 72px;
+    margin-left: 8px;
+}
+
+.el-overlay:has(.el-overlay-dialog) {
+    pointer-events: none;
+    background-color: transparent;
+    overflow: scroll;
+}
+
+.el-overlay .el-overlay-dialog {
+    width: 100%;
+    height: 100%;
+}
+
+.el-overlay .el-dialog {
+    pointer-events: auto;
+}

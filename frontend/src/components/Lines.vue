@@ -3,6 +3,7 @@ import axios from "axios";
 import {ref} from "vue";
 import {truncate} from "../util.js";
 import dayjs from "dayjs";
+import {ElMessage} from "element-plus";
 
 const dialogVisible = ref(false), dialogMode = ref('add'), loading = ref(false);
 const line_name = ref(''), start_time = ref(''), end_time = ref(''), intro = ref(''), mileage = ref(''),
@@ -55,15 +56,19 @@ const columns = [
 const data = ref([]);
 
 function update() {
+    loading.value = true;
     setTimeout(() => {
         axios({
             method: 'get',
             url: 'http://127.0.0.1:5000/lines',
             data: {}
         }).then((response) => {
+            loading.value = false;
             data.value = response.data;
         }).catch((error) => {
+            loading.value = false;
             console.log(error);
+            ElMessage.error(error);
         });
     }, 500);
 }
@@ -98,6 +103,9 @@ function submitLineDialog() {
             url: 'http://127.0.0.1:5000/lines/' + line_id.value,
             data: form,
             headers: {'Content-Type': `multipart/form-data; boundary=${form._boundary}`}
+        }).catch((error) => {
+            console.log(error);
+            ElMessage.error(error);
         });
     } else {
         axios({
@@ -105,6 +113,9 @@ function submitLineDialog() {
             url: 'http://127.0.0.1:5000/lines',
             data: form,
             headers: {'Content-Type': `multipart/form-data; boundary=${form._boundary}`}
+        }).catch((error) => {
+            console.log(error);
+            ElMessage.error(error);
         });
     }
     update();
@@ -186,6 +197,12 @@ function addLine() {
                    style="box-shadow: 0 0 2px 1px #00000014" @click="addLine()">
             <el-icon :size="20">
                 <Plus/>
+            </el-icon>
+        </el-button>
+        <el-button circle size="large" class="absolute top-3 right-16"
+                   style="box-shadow: 0 0 2px 1px #00000014" @click="data = []; update()">
+            <el-icon :size="20">
+                <Refresh/>
             </el-icon>
         </el-button>
         <el-table

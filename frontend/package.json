@@ -13,6 +13,7 @@
     "dayjs": "^1.11.11",
     "element-plus": "^2.7.2",
     "golden-layout": "^2.6.0",
+    "interactjs": "^1.10.27",
     "pinia": "^2.1.7",
     "vue": "^3.4.21"
   },

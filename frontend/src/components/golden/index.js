@@ -24,13 +24,7 @@ export const defaultLayoutConfig = {
             {
                 type: 'component',
                 componentType: 'cards',
-                title: 'Cards',
-                height: 20
-            },
-            {
-                type: 'component',
-                componentType: 'passengers',
-                title: 'Passengers',
+                title: 'Cards & Passengers',
                 height: 20
             },
         ]
