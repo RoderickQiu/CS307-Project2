@@ -34,20 +34,20 @@
 │   └─ Process.py
 ```
 
-- [\_\_init\_\_.py](backend/__init__.py): 使得改文件夹被识别为一个Python包
-- [app.py](backend/app.py): 
-- [config.py](backend/config.py): 
-- [controllers.py](backend/controllers.py): 
-- [models.py](backend/models.py): 
-- [urls.py](backend/urls.py): 
-- [Process.py](Data_process/Process.py): 
+- [\_\_init\_\_.py](backend/__init__.py): 使得该文件夹被识别为一个Python包。
+- [app.py](backend/app.py): 包含应用程序的主要运行逻辑
+- [config.py](backend/config.py): 包含应用程序的配置信息，如数据库连接字符串、密钥等
+- [controllers.py](backend/controllers.py): 包含处理请求和响应的控制器函数
+- [models.py](backend/models.py): 定义应用程序的数据模型，与数据库表格对应
+- [urls.py](backend/urls.py): 定义应用程序的URL路由访问规则
+- [Process.py](Data_process/Process.py): 处理或转换数据的脚本，将票价.xlsx转换为csv文件后再转换为可直接用的数据
 
 ## 使用指南:
 ### 本地配置
 按照`Requirement.txt`中的版本安装 `Flask` `Flask_Migrate` `flask_sqlalchemy` `SQLAlchemy`
 `cd backend`切换到backend目录下后运行`flask run`即可开启后端口
 
-### 常用操作(默认本地路径:http://127.0.0.1:5000)
+### 基础部分(默认本地路径:http://127.0.0.1:5000)
 #### 线路操作
 
 ##### 获取所有线路或创建线路
