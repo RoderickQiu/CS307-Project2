@@ -191,3 +191,96 @@
 - 请求路径：`/online`
 - 请求方法：`GET`
 - 描述：获取当前地铁线上还未下车的人数以及其具体信息。
+
+---
+---
+
+### 进阶部分
+
+#### MySQL数据库配置
+
+#### 更多功能
+
+1. **地铁站状态**：增加并合理使用地铁站状态，例如：建设中、运营中、关闭中等。
+    - 在`/stations`中增加`status`字段，表示地铁站状态。
+2. **商务车厢信息**：增加商务车厢的信息，如乘坐商务车厢，价格翻倍。
+    - 在`/lines`中增加`business_carriage`字段，表示是否有商务车厢。
+    - 在`/stations`中增加`business_carriage`字段，表示是否有商务车厢。
+    - 在`/card_rides`中增加`business_carriage`字段，表示是否乘坐商务车厢, 如若乘坐商务车厢，价格翻倍。
+
+3. **多参数搜索乘车记录功能**：通过地铁站、乘车人、时间段等实现$1$~$n$ 参数搜索乘车记录功能。具体使用方法如下：
+
+    - `/queryuser`：查询用户乘车记录。你可以在 POST 请求的表单数据中包含以下参数：
+        - `business_carriage`：商务车厢
+        - `from_station`：起始站
+        - `to_station`：终点站
+        - `user_id`：用户 ID
+        - `on_the_ride`：是否在乘车
+        - `price`：价格
+        - `time`：时间（格式为 "YYYY-MM-DDTHH:MM:SS"）
+
+    - `/querycard`：查询卡片乘车记录。你可以在 POST 请求的表单数据中包含以下参数：
+        - `business_carriage`：商务车厢
+        - `from_station`：起始站
+        - `to_station`：终点站
+        - `card_id`：卡片 ID
+        - `on_the_ride`：是否在乘车
+        - `price`：价格
+        - `time`：时间（格式为 "YYYY-MM-DDTHH:MM:SS")
+
+4. **获取指定用户的所有行程**：获取指定用户的所有行程。
+    - 请求路径：`/user_rides/user/<user_id>`
+    - 请求方法：`GET`
+
+5. **获取所有用户或创建用户**：获取所有用户的列表或创建新的用户。
+    - 请求路径：`/users`
+    - 请求方法：`GET`, `POST`
+    - 描述：对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`user_id_number` `name` `phone` `gender` `district`)
+    - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值为这样的形式：
+        ```
+        {
+          "page": "1",
+          "total": "2000",
+          "result": { RESPONSE }
+        }
+        ```
+
+6. **获取所有卡或创建卡**：获取所有卡的列表或创建新的卡。
+    - 请求路径：`/cards`
+    - 请求方法：`GET`, `POST`
+    - 描述：对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息(`card_number` `money` `create_time`)
+    - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值为这样的形式：
+        ```
+        {
+          "page": "1",
+          "total": "2000",
+          "result": { RESPONSE }
+        }
+        ```
+
+7. **获取指定卡的所有行程**：获取指定卡的所有行程。
+    - 请求路径：`/card_rides/card/<card_id>`
+    - 请求方法：`GET`
+
+#### 封装并实现⼀个真正的后端服务器
+1. **ORM映射**：
+    - 使用SQLAlchemy实现ORM映射，将数据库表格映射为Python类，实现对数据库的操作。
+    - 在`/backend/models.py`中定义了`Line` `Station` `User` `Card` `CardRide` `UserRide`等类，分别对应数据库中的表格。
+    - 在`/backend/controllers.py`中实现了对数据库的增删改查操作。
+2. **连接池**：
+    - 使用SQLAlchemy实现连接池，提高数据库的访问效率。
+    - 在`/backend/config.py`中配置了数据库连接字符串，实现了连接池。
+3. **Flask后端框架**：
+    - 使用Flask框架实现后端服务器，实现了对请求的响应。
+    - 在`/backend/app.py`中实现了Flask应用程序的主要运行逻辑。
+4. **代码包管理**：
+    - 使用Python的包管理工具，将代码封装为包，方便管理。
+    - 在`/backend/__init__.py`中实现了包的初始化。
+5. **套接字编程**：
+    - 使用Flask框架实现了套接字编程，实现了对请求的响应。
+    - 在`/backend/app.py`中实现了Flask应用程序的主要运行逻辑。
+
+#### 页面显示设计
+
+#### 合理使用数据库用户权限以及触发器
+  
