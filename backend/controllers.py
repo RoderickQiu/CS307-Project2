@@ -34,6 +34,7 @@ def create_line_controller():
     new_line = Line(
         line_id=new_line_id,
         line_name=request_form["line_name"],
+        bussiness_carriage=request_form["bussiness_carriage"],
         start_time=request_form["start_time"],
         end_time=request_form["end_time"],
         intro=request_form["intro"],
@@ -65,6 +66,7 @@ def update_line_controller(line_id):
     line = Line.query.get(line_id)
 
     line.line_name = request_form["line_name"]
+    line.bussiness_carriage = request_form["bussiness_carriage"]
     line.start_time = request_form["start_time"]
     line.end_time = request_form["end_time"]
     line.intro = request_form["intro"]
@@ -121,6 +123,7 @@ def create_station_controller():
         english_name=request_form["english_name"],
         chinese_name=request_form["chinese_name"],
         district=request_form["district"],
+        status=request_form["status"],
         introduction=request_form["introduction"],
     )
     db.session.add(new_station)
@@ -150,6 +153,7 @@ def update_station_controller(station_id):
     station.english_name = request_form["english_name"]
     station.chinese_name = request_form["chinese_name"]
     station.district = request_form["district"]
+    station.status = request_form["status"]
     station.introduction = request_form["introduction"]
 
     db.session.commit()
@@ -422,6 +426,7 @@ def create_card_ride_controller():
     new_card_ride = CardRides(
         ride_id=new_ride_id,
         card_id=request_form["card_id"],
+        business_carriage=request_form["business_carriage"],
         on_the_ride=0,
         from_station=request_form["from_station"],
         to_station=request_form["from_station"],
@@ -454,6 +459,7 @@ def create_user_ride_controller():
     new_user_ride = UserRides(
         ride_id=new_ride_id,
         user_id=request_form["user_id"],
+        business_carriage=request_form["business_carriage"],
         on_the_ride=0,
         from_station=request_form["from_station"],
         to_station=request_form["from_station"],
@@ -550,6 +556,8 @@ def update_card_ride_controller(ride_id):
     to_station_name = to_station.chinese_name
 
     price = find(from_station_name, to_station_name)
+    if ride.business_carriage == 1:
+        price *= 2
     ride.on_the_ride = 1
     ride.to_station = request_form["to_station"]
     ride.price = price
@@ -575,6 +583,8 @@ def update_user_ride_controller(ride_id):
     to_station_name = to_station.chinese_name
 
     price = find(from_station_name, to_station_name)
+    if ride.business_carriage == 1:
+        price *= 2
     ride.on_the_ride = 1
     ride.to_station = request_form["to_station"]
     ride.price = price
@@ -616,6 +626,9 @@ def query_user_controller():
     request_form = request.form.to_dict()
     query = UserRides.query
 
+    if 'business_carriage' in request_form:
+        query = query.filter(UserRides.business_carriage == request_form['business_carriage'])
+
     if 'from_station' in request_form:
         query = query.filter(UserRides.from_station == request_form['from_station'])
 
@@ -646,6 +659,9 @@ def query_user_controller():
 def query_card_controller():
     request_form = request.form.to_dict()
     query = CardRides.query
+
+    if 'business_carriage' in request_form:
+        query = query.filter(CardRides.business_carriage == request_form['business_carriage'])
 
     if 'from_station' in request_form:
         query = query.filter(CardRides.from_station == request_form['from_station'])

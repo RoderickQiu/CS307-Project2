@@ -108,7 +108,7 @@ def list_create_cards():
         return "Method is Not Allowed"
 
 
-@app.route("/card_rides", methods=["GET", "POST"])  # /card_ride
+@app.route("/card_rides", methods=["GET", "POST"])  # /card_rides
 def list_create_card_rides():
     if request.method == "GET":
         return list_all_card_rides_controller()
@@ -118,7 +118,7 @@ def list_create_card_rides():
         return "Method is Not Allowed"
 
 
-@app.route("/user_rides", methods=["GET", "POST"])  # /user_ride
+@app.route("/user_rides", methods=["GET", "POST"])  # /user_rides
 def list_create_user_rides():
     if request.method == "GET":
         return list_all_user_rides_controller()
@@ -128,7 +128,7 @@ def list_create_user_rides():
         return "Method is Not Allowed"
 
 
-@app.route("/card_rides/<ride_id>", methods=["GET", "DELETE", "PUT"])  # /card_ride/1
+@app.route("/card_rides/<ride_id>", methods=["GET", "DELETE", "PUT"])  # /card_rides/1
 def retrieve_destroy_card_ride(ride_id):
     if request.method == "GET":
         return retrieve_card_ride_controller(ride_id)
@@ -139,7 +139,7 @@ def retrieve_destroy_card_ride(ride_id):
     else:
         return "Method is Not Allowed"
 
-@app.route("/card_rides/card/<card_number>", methods=["GET"])  # /card_ride/card/1
+@app.route("/card_rides/card/<card_number>", methods=["GET"])  # /card_rides/card/1
 def retrieve_card_rides(card_number):
     if request.method == "GET":
         return retrieve_card_rides_controller(card_number)
