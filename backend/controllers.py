@@ -12,14 +12,7 @@ from .models import Line, Station, LineDetail, Users, Cards, CardRides, UserRide
 
 
 def list_all_lines_controller():
-    lines = Line.query.order_by(
-        func.cast(
-            func.unnest(func.regexp_matches(Line.line_name, "^\\D*(\\d+)\\D*|$")).label(
-                "number"
-            ),
-            Integer,
-        )
-    ).all()
+    lines = Line.query.order_by(Line.line_id).all()
     response = []
     for line in lines:
         response.append(line.toDict())
