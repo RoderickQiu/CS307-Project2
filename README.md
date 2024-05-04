@@ -104,12 +104,14 @@
 - 请求路径：`/lines`
 - 请求方法：`GET`, `POST`
 - 描述：获取所有线路的列表或创建新的线路。对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`line_name` `business_carriage` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
+- 返回值：对于GET方法，返回一个JSON数组，每个元素为一个线路的JSON对象。对于POST方法，返回新创建的线路的JSON对象。
 
 ##### 获取、更新或删除指定线路
 
 - 请求路径：`/lines/<line_id>`
 - 请求方法：`GET`, `PUT`, `DELETE`
 - 描述：获取、更新或删除指定ID的线路。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`line_name` `business_carriage` `start_time` `end_time` `intro` `mileage` `color` `first_opening` `url`)
+- 返回值：对于GET方法，返回指定线路的JSON对象。对于PUT方法，返回更新后的线路的JSON对象。对于DELETE方法，返回删除成功的信息(附带`line_id`)。
 
 #### 2. 车站操作
 
@@ -127,12 +129,14 @@
         "result": { RESPONSE }
       }
       ```
+- 返回值：对于GET方法，返回一个JSON数组，每个元素为一个车站的JSON对象。对于POST方法，返回新创建的车站的JSON对象。
 
 ##### 获取、更新或删除指定车站
 
 - 请求路径：`/stations/<station_id>`
 - 请求方法：`GET`, `PUT`, `DELETE`
 - 描述：获取、更新或删除指定ID的车站。对于PUT方法，需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。, Status字段包括三个状态`opening` `closed` `under`。(`English_name` `Chinese_name` `District` `Status` `Introduction`)
+- 返回值：对于GET方法，返回指定车站的JSON对象。对于PUT方法，返回更新后的车站的JSON对象。对于DELETE方法，返回删除成功的信息(附带`station_id`)。
 
 #### 3-4. 线路和车站操作
 
@@ -141,7 +145,7 @@
 - 请求路径：`/lines/<line_id>/stations`
 - 请求方法：`GET`
 - 描述：获取指定线路上的所有车站。
-- 返回值：Lines的JSON数组。
+- 返回值：返回一个JSON数组，每个元素为一个车站的JSON对象。
 
 ##### 获取、添加或删除线路上的指定车站
 
@@ -150,12 +154,14 @@
 - 描述：
   - 获取、添加或删除线路上的指定车站。在POST方法中，需要在Body字段中按照字典的格式添加每一个字段所对应的信息（数字型`line_num`）。
   - 另外，对于POST方法，我们可以指定station_id为一个数组，从而可以一次放入多个车站，使用格式如`stations/[1,2,3]`，表示在在line_num位置先后添加station_id为1，2，3的三个车站。若只导入单个车站，使用`stations/1`格式即可。
+- 返回值：对于GET方法，获取成功则返回指定线路上的指定车站的JSON对象, 如果该车站不存在则返回"Station not found on line!"。对于POST方法，添加成功则返回添加成功的信息，若该车站已在该地铁线上，则返回"Station already exists in the Line, abort!"。对于DELETE方法，删除成功则返回删除成功的信息(附带`station_id`和`line_id`), 否则返回失败的信息。
 
 ##### 获取线路上指定车站的前后n个车站
 
 - 请求路径：`/lines/<line_id>/stations/<station_id>/n/<n>`
 - 请求方法：`GET`
 - 描述：获取线路上指定车站的前后n个车站。
+- 返回值：返回一个JSON数组，每个元素为一个车站的JSON对象。若n超出范围, 则返回错误信息。
 
 注意：在以上的路径中，`<line_id>`、`<station_id>`和`<n>`需要替换为实际的线路ID、车站ID和车站数量。
 
@@ -166,18 +172,21 @@
 - 请求路径：`/card_rides`
 - 请求方法：`GET`, `POST`
 - 描述：获取所有卡行程的列表或创建新的卡行程。对于POST方法(上车)，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`card_id` `from_station` `start_time` `business_carriage`)
+- 返回值：对于GET方法，返回一个JSON数组，每个元素为一个卡行程的JSON对象。对于POST方法，返回新创建的卡行程的JSON对象。
 
 ##### 获取、更新或删除指定卡行程
 
 - 请求路径：`/card_rides/<ride_id>`
 - 请求方法：`GET`, `PUT`, `DELETE`
 - 描述：获取、更新或删除指定ID的卡行程。对于PUT方法（下车），需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`to_station` `end_time`)
+- 返回值：对于GET方法，返回指定卡行程的JSON对象。对于PUT方法，返回更新后的卡行程的JSON对象。对于DELETE方法，返回删除成功的信息(附带`ride_id`)。
 
 ##### 获取所有用户行程或创建用户行程
 
 - 请求路径：`/user_rides`
 - 请求方法：`GET`, `POST`
 - 描述：获取所有用户行程的列表或创建新的用户行程。对于POST方法(上车)，需要在Body字段中按照字典的格式添加每一个字段所对应的信息。(`user_id` `from_station` `start_time` `business_carriage`)
+- 返回值：对于GET方法，返回一个JSON数组，每个元素为一个用户行程的JSON对象。对于POST方法，返回新创建的用户行程的JSON对象。
 
 ##### 获取、更新或删除指定用户行程
 
@@ -185,7 +194,7 @@
 - 请求方法：`GET`, `PUT`, `DELETE`
 - 描述：获取、更新或删除指定ID的用户行程。对于PUT方法（下车），需要在Body字段中按照字典的格式添加每一个字段更新后所对应的信息。(`to_station` `end_time`)
 - 注意：在以上的路径中，`<ride_id>`需要替换为实际的行程ID。
-
+- 返回值：对于GET方法，返回指定用户行程的JSON对象。对于PUT方法，返回更新后的用户行程的JSON对象。对于DELETE方法，返回删除成功的信息(附带`ride_id`)。
 
 #### 7. 在线人数操作
 
@@ -194,7 +203,7 @@
 - 请求路径：`/online`
 - 请求方法：`GET`
 - 描述：获取当前地铁线上还未下车的人数以及其具体信息。
-
+- 返回值：返回一个JSON数组，每个元素为一个用户行程的JSON对象或者一个卡行程的JSON对象。
 ---
 ---
 
@@ -220,6 +229,7 @@
     - 在`/lines`中增加`business_carriage`字段，表示是否有商务车厢。
     - 在`/stations`中增加`business_carriage`字段，表示是否有商务车厢。
     - 在`/card_rides`中增加`business_carriage`字段，表示是否乘坐商务车厢, 如若乘坐商务车厢，价格翻倍。
+    - 在`/user_rides`中增加`business_carriage`字段，表示是否乘坐商务车厢, 如若乘坐商务车厢，价格翻倍。
 
 3. **多参数搜索乘车记录功能**：通过地铁站、乘车人、时间段等实现$1$~$n$ 参数搜索乘车记录功能。具体使用方法如下：
 
