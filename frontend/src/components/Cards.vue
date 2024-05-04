@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import {becomeStyledTimeStr} from "@/util.js";
 
 const mode = ref('Cards'), data = ref([]), loading = ref(false),
-    page = ref(1), elem_per_page = ref(10), total = ref(0),
+    page = ref(1), elem_per_page = ref(20), total = ref(0),
     moreDialogVisible = ref(false), dialogVisible = ref(false), currentRow = ref({}),
     currentRides = ref([]), onlineRides = ref([]), fromStation = ref(''), startTime = ref(''),
     toStation = ref(''), endTime = ref(''), price = ref(), isBusiness = ref(false),

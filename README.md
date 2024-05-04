@@ -217,6 +217,8 @@
 
 具体使用时，仅需要在`/backend/.env`文件中，修改`DEVELOPMENT_DATABASE_URL`为`mysql+pymysql://<username>:<password>@<host>:<port>/<database>`，即可实现MySQL切换，实现一套代码、两个数据库系统皆可用。
 
+<img src="images/image-20240504153619065.png" alt="image-20240504153619065" style="zoom:50%;" /><img src="images/image-20240504153850428.png" alt="image-20240504153850428" style="zoom:50%;" />
+
 #### 更多API功能
 
 我们另多实现了几种API设计，完成了更多的系统功能需求。
@@ -316,12 +318,13 @@
 
 页面整体效果如下：
 
-| <img src="images/image-20240503221614656.png" alt="image-20240503221614656" style="zoom:50%;" /> | <img src="images/image-20240503223545782.png" alt="image-20240503223545782" style="zoom: 67%;" /> |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
+<img src="images/image-20240503221614656.png" alt="image-20240503221614656" style="zoom: 25%;" />
+
+<img src="images/image-20240503223545782.png" alt="image-20240503223545782" style="zoom: 33%;" />
 
 我们总结出该前端界面的以下特点，并因此认为这是一个具有良好效果的数据库应用系统管理界面：
 
-1. **基于包管理的现代开发方式**，使用了Vite、Vue、Tailwind、ElementPlus、Axios、DayJS等流行的NPM库，使得代码可读性强、实现效果流畅。
+1. **基于包管理的现代开发方式**，使用了Vite（项目基座）、Vue（基础框架）、Tailwind（原子CSS复用）、ElementPlus（UI组件风格）、Axios（后端数据请求）、DayJS（日期处理）等流行的NPM库，使得代码可读性强、实现效果流畅。
 2. **支持后端API的所有功能**，可以很好的进行展示和测试。
 3. **是一套完整、自洽的系统，使用流畅**，包含各种主要数据结构的列表展示和操作，并考虑到了多处的性能优化，使得只需要使用这套系统，就可以快速完整执行所有操作。
 4. **美观优雅、风格统一，自定义程度高**，整体使用ElementPlus统一设计风格，并通过GoldenLayout实现多个界面的自由组织。
@@ -329,6 +332,7 @@
 #### 合理使用数据库用户权限以及触发器
 
 1. **用户权限**：
+    
     - 使用Postgres实现用户权限的配置，限制用户对数据库的访问权限。
     - 首先在Postgres中执行以下代码
         ```sql
@@ -388,3 +392,48 @@
     event.listen(Station, 'before_insert', Station.default_status)
     ```
     - 这种方法的优点是，我们可以在不改变数据库结构的情况下，对数据进行预处理和验证，提高了数据的一致性和完整性。
+
+#### 大数据管理
+
+我们发现，所提供的数据量是很大的，尤其对于`Users`、`Cards`及其对应记录，数据量达到万级。
+
+因此，为了防止通信成本过高、前端解析耗时过长，我们为`Stations`、`Users`、`Cards`三个在前端中直接列出全体列表的大数据表的相关API做了分页处理，以下以对`Users`库的相关解析逻辑为例，阐述我们通过分页操作实现大数据管理的实践。
+
+```python
+def list_all_users_controller():
+    elem_per_page = int(request.args.get("elem_per_page", 10))
+    page = int(
+        request.args.get("page", 1)
+    )  # for GET, use request.args instead of request.form
+    offset = (page - 1) * elem_per_page
+    users = Users.query.all()
+    response = []
+    for user in users[offset : offset + elem_per_page]:
+        response.append(user.toDict())
+    return jsonify(
+        {
+            "page": page,
+            "total": len(users),
+            "result": response,
+        }
+    )
+```
+
+在后端中，我们为`list_all`的相关方法传入`elem_per_page`和`page`的GET参数，分别代表每页显示的记录数和当前获取的相关页数。然后只返回对应位置的内容即可，同时传出总共的记录条数，方便前端进行分页。
+
+<img src="images/image-20240504152935380.png" alt="image-20240504152935380" style="zoom:50%;" />
+
+然后，我们在前端中实现了一个页数选择的组件，并通过Axios传参，获取数据并显示。前端中与获取数据相关的代码如下：
+
+```javascript
+axios({
+	method: 'get',
+	url: 'http://127.0.0.1:5000/' + mode.value.toLowerCase(),
+	params: { page: page.value, elem_per_page: elem_per_page.value }
+}).then((response) => {
+	data.value = response.data.result;
+	total.value = response.data.total;
+	loading.value = false;
+});
+```
+
