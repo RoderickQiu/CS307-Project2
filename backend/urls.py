@@ -2,7 +2,7 @@ from flask import request, jsonify
 from sqlalchemy import text
 from functools import wraps
 
-from .app import app
+from backend.app import app
 from .controllers import *
 
 
@@ -141,6 +141,7 @@ def retrieve_destroy_card_ride(ride_id):
     else:
         return "Method is Not Allowed"
 
+
 @app.route("/card_rides/card/<card_number>", methods=["GET"])  # /card_rides/card/1
 def retrieve_card_rides(card_number):
     if request.method == "GET":
@@ -160,6 +161,7 @@ def retrieve_destroy_user_ride(ride_id):
     else:
         return "Method is Not Allowed"
 
+
 @app.route("/user_rides/user/<user_id>", methods=["GET"])  # /user_ride/user/1
 def retrieve_user_rides(user_id):
     if request.method == "GET":
@@ -174,7 +176,8 @@ def retrieve_online_person():
         return retrieve_online_person_controller()
     else:
         return "Method is Not Allowed"
-    
+
+
 # Bonus---------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------
 # 多参数搜索乘⻋记录功能
@@ -184,20 +187,23 @@ def query():
         return query_user_controller()
     else:
         return "Method is Not Allowed"
-    
+
+
 @app.route("/querycard", methods=["POST"])  # /querycard
 def query_card():
     if request.method == "POST":
         return query_card_controller()
     else:
         return "Method is Not Allowed"
-    
+
+
 # 在进行用户权限测试之前，需要先在数据库中创建两个用户，分别为read_user和write_user, 在数据库中执行以下命令：
-#CREATE USER read_user WITH PASSWORD '123456';
-#GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_user;
-#CREATE USER write_user WITH PASSWORD '123456';
-#GRANT ALL PRIVILEGES ON DATABASE project1 TO write_user;
-#GRANT INSERT ON lines TO write_user;
+# CREATE USER read_user WITH PASSWORD '123456';
+# GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_user;
+# CREATE USER write_user WITH PASSWORD '123456';
+# GRANT ALL PRIVILEGES ON DATABASE project1 TO write_user;
+# GRANT INSERT ON lines TO write_user;
+
 
 @app.route("/read_user", methods=["GET", "POST"])  # /read_user
 def read_user():
@@ -208,6 +214,7 @@ def read_user():
     else:
         return "Method is Not Allowed", 405
 
+
 @app.route("/write_user", methods=["GET", "POST"])  # /write_user
 def write_user():
     if request.method == "GET":
@@ -216,5 +223,3 @@ def write_user():
         return write_user_write_controller()
     else:
         return "Method is Not Allowed", 405
-
-    

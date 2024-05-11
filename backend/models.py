@@ -1,7 +1,7 @@
 from sqlalchemy import inspect
 from sqlalchemy import event
 
-from .app import db  # from __init__.py
+from backend.app import db  # from __init__.py
 
 
 class LineDetail(db.Model):
@@ -21,9 +21,7 @@ class LineDetail(db.Model):
 
 class Line(db.Model):
     __tablename__ = "lines"
-    line_id = db.Column(
-        db.Integer, primary_key=True, nullable=False, unique=True
-    )
+    line_id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
     line_name = db.Column(db.String(10), nullable=False)
     business_carriage = db.Column(db.Integer)
     start_time = db.Column(db.String(10), nullable=False)
@@ -34,45 +32,51 @@ class Line(db.Model):
     first_opening = db.Column(db.Date, nullable=False)
     url = db.Column(db.String(100), nullable=False)
 
-    stations = db.relationship("LineDetail", back_populates="line") # name used for back_populates
+    stations = db.relationship(
+        "LineDetail", back_populates="line"
+    )  # name used for back_populates
 
     def toDict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    
+
     @staticmethod
     def default_business_carriage(mapper, connection, target):
         if target.business_carriage is None:
             target.business_carriage = 0
 
-event.listen(Line, 'before_insert', Line.default_business_carriage)
 
+event.listen(Line, "before_insert", Line.default_business_carriage)
 
 
 class Station(db.Model):
     __tablename__ = "stations"
-    station_id = db.Column(
-        db.Integer, primary_key=True, nullable=False, unique=True
-    )
+    station_id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)
     english_name = db.Column(db.String(900), nullable=False)
     chinese_name = db.Column(db.String(900), nullable=False)
     district = db.Column(db.String(900), nullable=False)
     status = db.Column(db.String(10), nullable=False)
     introduction = db.Column(db.Text)
-    lines = db.relationship("LineDetail", back_populates="station") # name used for back_populates
+    lines = db.relationship(
+        "LineDetail", back_populates="station"
+    )  # name used for back_populates
 
     def toDict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    
+
     @staticmethod
     def default_status(mapper, connection, target):
         if target.status is None:
-            target.status = 'opening'
+            target.status = "opening"
 
-event.listen(Station, 'before_insert', Station.default_status)
+
+event.listen(Station, "before_insert", Station.default_status)
+
 
 class Users(db.Model):
     __tablename__ = "users"
-    user_id_number = db.Column(db.String(18), primary_key=True, nullable=False, unique=True)
+    user_id_number = db.Column(
+        db.String(18), primary_key=True, nullable=False, unique=True
+    )
     name = db.Column(db.String(20), nullable=False)
     phone = db.Column(db.String(11))
     gender = db.Column(db.String(1))
@@ -93,20 +97,23 @@ class UserRides(db.Model):
     price = db.Column(db.Float, nullable=False)
     start_time = db.Column(db.String(255))
     end_time = db.Column(db.String(255))
-    
 
     def toDict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    
+
+
 class Cards(db.Model):
     __tablename__ = "cards"
-    card_number = db.Column(db.String(10), primary_key=True, nullable=False, unique=True)
+    card_number = db.Column(
+        db.String(10), primary_key=True, nullable=False, unique=True
+    )
     money = db.Column(db.Float, nullable=False)
     create_time = db.Column(db.String(255))
 
     def toDict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    
+
+
 class CardRides(db.Model):
     __tablename__ = "card_rides"
     ride_id = db.Column(db.Integer, primary_key=True, nullable=False, unique=True)

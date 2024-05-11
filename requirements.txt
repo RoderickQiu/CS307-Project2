@@ -6,6 +6,8 @@ gevent==23.9.0.post1
 psycopg2-binary==2.9.9
 pymysql==1.1.0
 pyobjc_framework_Cocoa==10.2
+python-dotenv==1.0.1
 setuptools==69.2.0
 SQLAlchemy==2.0.29
+tornado==6.4
 typing_extensions==4.11.0

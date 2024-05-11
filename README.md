@@ -20,10 +20,11 @@
 
 **邱天润**：
 
-- 构建Lines和Stations相关API（基础要求1，2，3，4）。
+- 构建Lines和Stations相关API（基础要求1，2，3，4），以及自定的扩展要求（分页输出支持）。
 - 使用Vue等工具构建一个现代化的前端界面进行数据展示和测试，满足好用、优雅的扩展要求。
 - MySQL数据库测试。
 - 基于Flask的对后端的封装，RESTful API、连接池、ORM映射的实现，以及前后端的包管理。
+- 基于Tornado的高并发可用数据库及其压力测试。
 - 项目报告撰写。
 
 贡献百分比**相同，均为 50%**。
@@ -63,8 +64,10 @@
 │   ├── tailwind.config.js
 │   ├── vite.config.js
 │   └── yarn.lock
-├── Data_process
+├── data_process
 │   └─ Process.py
+├── tor.py
+└── requirements.txt
 ```
 
 主要文件介绍：
@@ -73,8 +76,9 @@
 - [controllers.py](backend/controllers.py): 包含处理请求和响应的控制器函数
 - [models.py](backend/models.py): 定义应用程序的数据模型，与数据库表格对应
 - [urls.py](backend/urls.py): 定义应用程序的URL路由访问规则
-- [Process.py](Data_process/Process.py): 处理或转换数据的脚本，将`票价.xlsx`转换为csv文件后再转换为可直接用的数据
-- [frontend/*](frontend/)：基于Vue，使用现代技术和前后端分离的思想，实现的一个优雅、易用前端界面，用于进行数据展示和测试
+- [tor.py](tor.py): 包含Tornado服务器的相关配置项
+- [dataProcess.py](data_process/Process.py): 处理或转换数据的脚本，将`票价.xlsx`转换为csv文件后再转换为可直接用的数据
+- [frontend/*](frontend/)：基于Vue，使用现代技术和前后端分离的思想，实现的一个优雅、易用的前端界面，用于进行数据展示和测试
 
 ## 使用指南：
 
@@ -217,7 +221,7 @@
 
 具体使用时，仅需要在`/backend/.env`文件中，修改`DEVELOPMENT_DATABASE_URL`为`mysql+pymysql://<username>:<password>@<host>:<port>/<database>`，即可实现MySQL切换，实现一套代码、两个数据库系统皆可用。
 
-<img src="images/image-20240504153619065.png" alt="image-20240504153619065" style="zoom:50%;" /><img src="images/image-20240504153850428.png" alt="image-20240504153850428" style="zoom:50%;" />
+<img src="images/image-20240504153619065.png" alt="image-20240504153619065" style="zoom: 33%;" /><img src="images/image-20240504153850428.png" alt="image-20240504153850428" style="zoom: 33%;" />
 
 #### 更多API功能
 
@@ -226,11 +230,12 @@
 另外，由于部分数据量较大，为了提升访问效率，我们采用了分页输出的形式，较好地优化了性能，具体详见以下描述。
 
 1. **地铁站状态**：增加并合理使用地铁站状态，例如：建设中、运营中、关闭中等。
+   
     - 在`/stations`中增加`status`字段，表示地铁站状态。
-    - 在`\user_rides`中检验上车站点的状态，如果为`closed`，则不允许上车。
-    <img src="images/user_rides1.jpg" alt="user_rides1" style="zoom:50%;" />
-    <img src="images/user_rides2.jpg" alt="user_rides2" style="zoom:50%;" />
-
+    - 在`/user_rides`和`/card_rides`中检验上车站点的状态，如果为`closed`或`under`（代表建设中），则不允许上车。
+    <img src="images/user_rides1.jpg" alt="user_rides1" style="zoom: 25%;" />
+    <img src="images/user_rides2.jpg" alt="user_rides2" style="zoom: 33%;" />
+    
 2. **商务车厢信息**：增加商务车厢的信息，如乘坐商务车厢，价格翻倍。
     - 在`/lines`中增加`business_carriage`字段，表示是否有商务车厢。
     - 在`/stations`中增加`business_carriage`字段，表示是否有商务车厢。
@@ -278,14 +283,7 @@
     - 请求路径：`/cards`
     - 请求方法：`GET`, `POST`
     - 描述：对于POST方法，需要在Body字段中按照字典的格式添加每一个字段所对应的信息(`card_number` `money` `create_time`)
-    - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值为这样的形式：
-        ```
-        {
-          "page": "1",
-          "total": "2000",
-          "result": { RESPONSE }
-        }
-        ```
+    - 对于GET方法，我们进行分页，在GET参数中添加`page`和`elem_per_page`字段，表示当前的页数和每页长度；返回值形式与前文所述一致。
     
 7. **获取指定卡的所有行程**：获取指定卡的所有行程。
     - 请求路径：`/card_rides/card/<card_id>`
@@ -299,25 +297,21 @@
     ```python
     def list_all_users_controller():
         elem_per_page = int(request.args.get("elem_per_page", 10))
-        page = int(
-            request.args.get("page", 1)
-        )  # for GET, use request.args instead of request.form
+        page = int(request.args.get("page", 1))
         offset = (page - 1) * elem_per_page
         users = Users.query.all()
         response = []
         for user in users[offset : offset + elem_per_page]:
             response.append(user.toDict())
-        return jsonify(
-            {
-                "page": page,
-                "total": len(users),
-                "result": response,
-            }
-        )
+        return jsonify({
+    		"page": page,
+    		"total": len(users),
+    		"result": response,
+        })
     ```
-	- 在后端中，我们为`list_all`的相关方法传入`elem_per_page`和`page`的GET参数，分别代表每页显示的记录数和当前获取的相关页数。然后只返回对应位置的内容即可，同时传出总共的记录条数，方便前端进行分页。<img src="images/image-20240504152935380.png" alt="image-20240504152935380" style="zoom:50%;" />
-	
-	- 然后，我们在前端中实现了一个页数选择的组件，并通过Axios传参，获取数据并显示。
+   - 在后端中，我们为`list_all`的相关方法传入`elem_per_page`和`page`的GET参数，分别代表每页显示的记录数和当前获取的相关页数。然后只返回对应位置的内容即可，同时传出总共的记录条数，方便前端进行分页。<img src="images/image-20240504152935380.png" alt="image-20240504152935380" style="zoom:50%;" />
+   
+   - 然后，我们在前端中实现了一个页数选择的组件，并通过Axios传参，获取数据并显示。
 
 #### 封装并实现⼀个真正的后端服务器
 1. **ORM映射**：
@@ -332,12 +326,13 @@
     - 在`/backend/app.py`中实现了Flask应用程序的主要运行逻辑。
 4. **代码包管理**：
     1. 后端层面
-        1. 使用Python的包管理工具，将代码封装为多个包，方便管理。
+        1. 使用Python的包管理工具，将代码封装为多个包，如`models`、`urls`等，方便管理。
         2. 在`/backend/__init__.py`中实现了包的初始化。
-
+        3. 添加了`requirements.txt`，方便其他用户配置PyPi包环境。
+        
     2. 前端层面
         1. 使用NPM/Yarn进行包管理，较好地实现了代码复用。
-
+    
 5. **套接字编程和RESTFul API支持**：
     - 使用Flask框架实现了套接字编程，实现了对请求的响应。
     - 通信范式按照`RESTFul API`规范进行设计，确保了设计的通用性、规范性和可扩展性。
@@ -350,9 +345,8 @@
 
 页面整体效果如下：
 
-<img src="images/image-20240503221614656.png" alt="image-20240503221614656" style="zoom: 25%;" />
-
-<img src="images/image-20240503223545782.png" alt="image-20240503223545782" style="zoom: 33%;" />
+| <img src="images/image-20240503221614656.png" alt="image-20240503221614656" style="zoom: 25%;" /> | <img src="images/image-20240503223545782.png" alt="image-20240503223545782" style="zoom: 33%;" /> |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 我们总结出该前端界面的以下特点，并因此认为这是一个具有良好效果的数据库应用系统管理界面：
 
@@ -402,25 +396,42 @@
 </table>
 
 2. **触发器**：
-    - 我们使用SQLAlchemy的事件监听功能来实现触发器，对数据库的操作进行自动化处理。具体来说，我们在插入新的`Line`或`Station`记录之前，设置了一些默认值。
-
-    - 对于`Line`模型，我们在插入新的线路记录之前，如果没有指定`business_carriage`（商务车厢），则默认为`0`。这是通过`before_insert`事件监听器和`default_business_carriage`静态方法实现的。代码如下：
-    ```python
-    @staticmethod
-    def default_business_carriage(mapper, connection, target):
-        if target.business_carriage is None:
-            target.business_carriage = 0
     
-    event.listen(Line, 'before_insert', Line.default_business_carriage)
-    ```
-
-    - 对于`Station`模型，我们在插入新的站点记录之前，如果没有指定`status`（站点状态），则默认为`opening`。这是通过`before_insert`事件监听器和`default_status`静态方法实现的。代码如下：
-    ```python
-    @staticmethod
-    def default_status(mapper, connection, target):
-        if target.status is None:
-            target.status = 'opening'
+    - 我们使用SQLAlchemy的事件监听功能来实现触发器，对数据库的操作进行自动化处理。具体来说，我们在插入新的`Line`或`Station`记录等事件之前，设置了一些默认值。
     
-    event.listen(Station, 'before_insert', Station.default_status)
-    ```
+    - 以下以这两种情况为例：
+      - 对于`Line`模型，我们在插入新的线路记录之前，如果没有指定`business_carriage`（商务车厢），则默认为`0`。这是通过`before_insert`事件监听器和`default_business_carriage`静态方法实现的。代码如下：
+    
+        ```python
+        @staticmethod
+        def default_business_carriage(mapper, connection, target):
+            if target.business_carriage is None:
+                target.business_carriage = 0
+        
+        event.listen(Line, 'before_insert', Line.default_business_carriage)
+        ```
+    
+      - 对于`Station`模型，我们在插入新的站点记录之前，如果没有指定`status`（站点状态），则默认为`opening`。这是通过`before_insert`事件监听器和`default_status`静态方法实现的。代码如下：
+      
+          ```python
+          @staticmethod
+          def default_status(mapper, connection, target):
+              if target.status is None:
+                  target.status = 'opening'
+          
+          event.listen(Station, 'before_insert', Station.default_status)
+          ```
+      
     - 这种方法的优点是，我们可以在不改变数据库结构的情况下，对数据进行预处理和验证，提高了数据的一致性和完整性。
+
+#### 高并发和压力测试
+
+Flask默认包含的服务器组件高并发能力比较孱弱。为了解决这一问题，我们搜索了对于Python服务器的高并发解决方案，并决定使用Tornado作为服务器终端。运行Tornado服务器的指令是`python tor.py`。
+
+> Tornado是一个Python网络库，主要用于非阻塞网络连接的开发，是一个轻量级的网络框架。Tornado的特点是拥有一个高效的网络并发处理能力，特别适合用于处理长连接、WebSocket 和其他需要与每个用户保持持续连接的应用。其核心特点是非阻塞异步IO库。这意味着你可以同时处理数以千计的连接。
+
+我们使用`siege`进行压力测试，具体使用的语句为：`siege -c <THREADS_NUM> -r 10 -b http://127.0.0.1:5000/stations/5`。
+
+以下是高并发的测试结果，可以看到，当线程数超过500时，Tornado可以明显提升服务器可用性。
+
+<img src="images/Figure_1.png" alt="Figure_1" style="zoom: 50%;" />
