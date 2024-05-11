@@ -150,7 +150,7 @@ def update_station_controller(station_id):
     station.district = request_form["district"]
     station.status = status
     station.introduction = request_form["introduction"]
-
+    print(request_form)
     db.session.commit()
 
     response = Station.query.get(station_id).toDict()
@@ -450,6 +450,9 @@ def create_user_ride_controller():
     max_ride_id = (
         max(user_ride.ride_id for user_ride in user_rides) if user_rides else 0
     )
+    Current_From_Station = Station.query.filter_by(station_id = request_form["from_station"]).first()
+    if Current_From_Station.status != "opening":
+        return jsonify({"error": "The station is not opening."}), 404
     new_ride_id = max_ride_id + 1
     new_user_ride = UserRides(
         ride_id=new_ride_id,
