@@ -227,6 +227,10 @@
 
 1. **地铁站状态**：增加并合理使用地铁站状态，例如：建设中、运营中、关闭中等。
     - 在`/stations`中增加`status`字段，表示地铁站状态。
+    - 在`\user_rides`中检验上车站点的状态，如果为`closed`，则不允许上车。
+    <img src="images/user_rides1.jpg" alt="user_rides1" style="zoom:50%;" />
+    <img src="images/user_rides2.jpg" alt="user_rides2" style="zoom:50%;" />
+
 2. **商务车厢信息**：增加商务车厢的信息，如乘坐商务车厢，价格翻倍。
     - 在`/lines`中增加`business_carriage`字段，表示是否有商务车厢。
     - 在`/stations`中增加`business_carriage`字段，表示是否有商务车厢。
@@ -282,10 +286,38 @@
           "result": { RESPONSE }
         }
         ```
-
+    
 7. **获取指定卡的所有行程**：获取指定卡的所有行程。
     - 请求路径：`/card_rides/card/<card_id>`
     - 请求方法：`GET`
+
+8. **其他功能**：分页功能的实现。
+
+   - 我们发现，所提供的数据量是很大的，尤其对于`Users`、`Cards`及其对应记录，数据量达到万级。
+
+   - 因此，为了防止通信成本过高、前端解析耗时过长，我们为`Stations`、`Users`、`Cards`三个在前端中直接列出全体列表的大数据表的相关API做了分页处理，以下以对`Users`库的相关解析逻辑为例，阐述我们通过分页操作实现大数据管理的实践。
+    ```python
+    def list_all_users_controller():
+        elem_per_page = int(request.args.get("elem_per_page", 10))
+        page = int(
+            request.args.get("page", 1)
+        )  # for GET, use request.args instead of request.form
+        offset = (page - 1) * elem_per_page
+        users = Users.query.all()
+        response = []
+        for user in users[offset : offset + elem_per_page]:
+            response.append(user.toDict())
+        return jsonify(
+            {
+                "page": page,
+                "total": len(users),
+                "result": response,
+            }
+        )
+    ```
+	- 在后端中，我们为`list_all`的相关方法传入`elem_per_page`和`page`的GET参数，分别代表每页显示的记录数和当前获取的相关页数。然后只返回对应位置的内容即可，同时传出总共的记录条数，方便前端进行分页。<img src="images/image-20240504152935380.png" alt="image-20240504152935380" style="zoom:50%;" />
+	
+	- 然后，我们在前端中实现了一个页数选择的组件，并通过Axios传参，获取数据并显示。
 
 #### 封装并实现⼀个真正的后端服务器
 1. **ORM映射**：
@@ -300,7 +332,7 @@
     - 在`/backend/app.py`中实现了Flask应用程序的主要运行逻辑。
 4. **代码包管理**：
     1. 后端层面
-        1. 使用Python的包管理工具，将代码封装为包，方便管理。
+        1. 使用Python的包管理工具，将代码封装为多个包，方便管理。
         2. 在`/backend/__init__.py`中实现了包的初始化。
 
     2. 前端层面
@@ -332,7 +364,7 @@
 #### 合理使用数据库用户权限以及触发器
 
 1. **用户权限**：
-    
+   
     - 使用Postgres实现用户权限的配置，限制用户对数据库的访问权限。
     - 首先在Postgres中执行以下代码
         ```sql
@@ -392,48 +424,3 @@
     event.listen(Station, 'before_insert', Station.default_status)
     ```
     - 这种方法的优点是，我们可以在不改变数据库结构的情况下，对数据进行预处理和验证，提高了数据的一致性和完整性。
-
-#### 大数据管理
-
-我们发现，所提供的数据量是很大的，尤其对于`Users`、`Cards`及其对应记录，数据量达到万级。
-
-因此，为了防止通信成本过高、前端解析耗时过长，我们为`Stations`、`Users`、`Cards`三个在前端中直接列出全体列表的大数据表的相关API做了分页处理，以下以对`Users`库的相关解析逻辑为例，阐述我们通过分页操作实现大数据管理的实践。
-
-```python
-def list_all_users_controller():
-    elem_per_page = int(request.args.get("elem_per_page", 10))
-    page = int(
-        request.args.get("page", 1)
-    )  # for GET, use request.args instead of request.form
-    offset = (page - 1) * elem_per_page
-    users = Users.query.all()
-    response = []
-    for user in users[offset : offset + elem_per_page]:
-        response.append(user.toDict())
-    return jsonify(
-        {
-            "page": page,
-            "total": len(users),
-            "result": response,
-        }
-    )
-```
-
-在后端中，我们为`list_all`的相关方法传入`elem_per_page`和`page`的GET参数，分别代表每页显示的记录数和当前获取的相关页数。然后只返回对应位置的内容即可，同时传出总共的记录条数，方便前端进行分页。
-
-<img src="images/image-20240504152935380.png" alt="image-20240504152935380" style="zoom:50%;" />
-
-然后，我们在前端中实现了一个页数选择的组件，并通过Axios传参，获取数据并显示。前端中与获取数据相关的代码如下：
-
-```javascript
-axios({
-	method: 'get',
-	url: 'http://127.0.0.1:5000/' + mode.value.toLowerCase(),
-	params: { page: page.value, elem_per_page: elem_per_page.value }
-}).then((response) => {
-	data.value = response.data.result;
-	total.value = response.data.total;
-	loading.value = false;
-});
-```
-
