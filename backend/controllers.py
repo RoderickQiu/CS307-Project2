@@ -83,9 +83,18 @@ def delete_line_controller(line_id):
             404,
         )
 
-    Line.query.filter_by(line_id=line_id).delete()
-    db.session.commit()
-    return ('Line with Id "{}" deleted successfully!').format(line_id)
+    try:
+        detail = LineDetail.query.filter_by(line_id=line_id)
+        if detail is not None:
+            detail.delete()  # First delete related LineDetail
+        Line.query.filter_by(line_id=line_id).delete()
+        db.session.commit()
+        return ('Line with Id "{}" deleted successfully!').format(line_id)
+    except:
+        return (
+            jsonify({"error": "Line with Id '{}' cannot be deleted.".format(line_id)}),
+            404,
+        )
 
 
 def list_all_stations_controller():
@@ -167,9 +176,28 @@ def delete_station_controller(station_id):
             404,
         )
 
-    Station.query.filter_by(station_id=station_id).delete()
-    db.session.commit()
-    return ('Station with Id "{}" deleted successfully!').format(station_id)
+    # try:
+    if True:
+        # first delete all related foreign things
+        detail = LineDetail.query.filter_by(station_id=station_id)
+        if detail is not None:
+            detail.delete()
+        u_rides = UserRides.query.filter_by(from_station=station_id)
+        if u_rides is not None:
+            u_rides.delete()
+        u_rides = UserRides.query.filter_by(to_station=station_id)
+        if u_rides is not None:
+            u_rides.delete()
+        c_rides = CardRides.query.filter_by(from_station=station_id)
+        if c_rides is not None:
+            c_rides.delete()
+        c_rides = CardRides.query.filter_by(to_station=station_id)
+        if c_rides is not None:
+            c_rides.delete()
+
+        Station.query.filter_by(station_id=station_id).delete()
+        db.session.commit()
+        return ('Station with Id "{}" deleted successfully!').format(station_id)
 
 
 def delete_station_from_line_controller(line_id, station_id):
@@ -417,6 +445,11 @@ def create_card_ride_controller():
     max_ride_id = (
         max(card_ride.ride_id for card_ride in card_rides) if card_rides else 0
     )
+    Current_From_Station = Station.query.filter_by(
+        station_id=request_form["from_station"]
+    ).first()
+    if Current_From_Station.status != "opening":
+        return jsonify({"error": "The station is not opening."}), 404
     new_ride_id = max_ride_id + 1
     new_card_ride = CardRides(
         ride_id=new_ride_id,
@@ -531,15 +564,26 @@ def delete_user_ride_controller(ride_id):
 
 
 def find(from_station, to_station):
-    with open("../data_process/data.txt", "r") as file:
-        lines = file.readlines()
+    try:
+        with open("../data_process/data.txt", "r") as file:
+            lines = file.readlines()
 
-    for line in lines:
-        parts = line.strip().split(",")
-        if parts[2] == from_station and parts[3] == to_station:
-            return int(parts[4])
+        for line in lines:
+            parts = line.strip().split(",")
+            if parts[2] == from_station and parts[3] == to_station:
+                return int(parts[4])
 
-    return jsonify({"error": "No matching route found."}), 404
+        return jsonify({"error": "No matching route found."}), 404
+    except FileNotFoundError:
+        with open("data_process/data.txt", "r") as file:
+            lines = file.readlines()
+
+        for line in lines:
+            parts = line.strip().split(",")
+            if parts[2] == from_station and parts[3] == to_station:
+                return int(parts[4])
+
+        return jsonify({"error": "No matching route found."}), 404
 
 
 def update_card_ride_controller(ride_id):

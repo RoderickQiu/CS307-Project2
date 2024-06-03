@@ -1,7 +1,7 @@
 <script setup>
 import axios from "axios";
 import {ref} from "vue";
-import {truncate} from "../util.js";
+import {getErrorMessage, truncate} from "../util.js";
 import dayjs from "dayjs";
 import {ElMessage} from "element-plus";
 
@@ -72,7 +72,7 @@ function update() {
         }).catch((error) => {
             loading.value = false;
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
         });
     }, 500);
 }
@@ -84,6 +84,9 @@ function deleteLine(lineId) {
         method: 'delete',
         url: 'http://127.0.0.1:5000/lines/' + lineId,
         data: {}
+    }).catch((error) => {
+        console.log(error);
+        ElMessage.error(getErrorMessage(error));
     });
     update();
 }
@@ -110,7 +113,7 @@ function submitLineDialog() {
             headers: {'Content-Type': `multipart/form-data; boundary=${form._boundary}`}
         }).catch((error) => {
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
         });
     } else {
         axios({
@@ -120,7 +123,7 @@ function submitLineDialog() {
             headers: {'Content-Type': `multipart/form-data; boundary=${form._boundary}`}
         }).catch((error) => {
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
         });
     }
     update();

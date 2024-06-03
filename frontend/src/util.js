@@ -13,3 +13,7 @@ export const becomeStyledTimeStr = (timeStr) => {
 export const firstLetterUppercase = (str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export const getErrorMessage = (error) => {
+    return error.response && error.response.data.error ? error.response.data.error : error.message;
+}

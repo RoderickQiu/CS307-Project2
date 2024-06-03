@@ -1,7 +1,7 @@
 <script setup>
 import axios from "axios";
 import {h, ref} from "vue";
-import {firstLetterUppercase, truncate} from "../util.js";
+import {firstLetterUppercase, getErrorMessage, truncate} from "../util.js";
 import dayjs from "dayjs";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {first} from "lodash-es";
@@ -57,7 +57,7 @@ function updateLines() {
         }).then((response) => {
             dataLines.value = response.data;
         }).catch((error) => {
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
             console.log(error);
         });
     }, 500);
@@ -75,7 +75,7 @@ function addStationOnLine() {
             fetchStationsOnLine(selectedLine.value);
         }, 500);
     }).catch((error) => {
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
         console.log(error);
     });
 }
@@ -90,7 +90,7 @@ function deleteStationOnLine() {
         }, 500);
     }).catch((error) => {
         console.log(error);
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
     });
 }
 
@@ -134,7 +134,7 @@ function getStationWithDistanceN() {
             })
         }
     }).catch((error) => {
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
         console.log(error);
     });
 }
@@ -155,7 +155,7 @@ function update() {
             loading.value = false;
         }).catch((error) => {
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
             loading.value = false;
         });
     }, 500);
@@ -176,7 +176,7 @@ function deleteStation(stationId) {
         data: {}
     }).catch((error) => {
         console.log(error);
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
     });
     update();
 }
@@ -199,7 +199,7 @@ function submitStationDialog() {
             headers: {'Content-Type': `multipart/form-data; boundary=${form._boundary}`}
         }).catch((error) => {
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
         });
     } else {
         axios({
@@ -209,7 +209,7 @@ function submitStationDialog() {
             headers: {'Content-Type': `multipart/form-data; boundary=${form._boundary}`}
         }).catch((error) => {
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
         });
     }
     update();
@@ -248,7 +248,7 @@ function fetchStationsOnLine(lineId) {
         dataStationsOnLine.value = response.data;
     }).catch((error) => {
         console.log(error);
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
     });
 }
 

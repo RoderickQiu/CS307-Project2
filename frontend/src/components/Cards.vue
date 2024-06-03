@@ -3,7 +3,7 @@ import {ref} from 'vue';
 import axios from "axios";
 import {ElMessage} from "element-plus";
 import dayjs from "dayjs";
-import {becomeStyledTimeStr} from "@/util.js";
+import {becomeStyledTimeStr, getErrorMessage} from "@/util.js";
 
 const mode = ref('Cards'), data = ref([]), loading = ref(false),
     page = ref(1), elem_per_page = ref(20), total = ref(0),
@@ -213,7 +213,7 @@ function update() {
             loading.value = false;
         }).catch((error) => {
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
             loading.value = false;
         });
     }, 500);
@@ -246,7 +246,7 @@ function fetchAllRides() {
             onlineRides.value = currentRides.value.filter(ride => ride.on_the_ride === 0);
         }).catch((error) => {
             console.log(error);
-            ElMessage.error(error);
+            ElMessage.error(getErrorMessage(error));
         });
     }, 500);
     getAllBoardingRides();
@@ -270,7 +270,7 @@ function getOnTheRide() {
         fetchAllRides();
     }).catch((error) => {
         console.log(error);
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
     });
 }
 
@@ -288,7 +288,7 @@ function getOffTheRide() {
         onlineRides.value = [];
     }).catch((error) => {
         console.log(error);
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
     });
 }
 
@@ -301,7 +301,7 @@ function getAllBoardingRides() {
         console.log(currentBoarding.value)
     }).catch((error) => {
         console.log(error);
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
     });
 }
 
@@ -345,7 +345,7 @@ function getQueryResult() {
         queryDialogVisible.value = false;
     }).catch((error) => {
         console.log(error);
-        ElMessage.error(error);
+        ElMessage.error(getErrorMessage(error));
     });
 }
 </script>
