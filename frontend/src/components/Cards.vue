@@ -9,8 +9,8 @@ const mode = ref('Cards'), data = ref([]), loading = ref(false),
     page = ref(1), elem_per_page = ref(20), total = ref(0),
     moreDialogVisible = ref(false), dialogVisible = ref(false), currentRow = ref({}),
     currentRides = ref([]), onlineRides = ref([]), fromStation = ref(''), startTime = ref(''),
-    toStation = ref(''), endTime = ref(''), price = ref(), isBusiness = ref(false),
-    currentBoarding = ref([]), queryDialogVisible = ref(false), isOnTheRide = ref(false),
+    toStation = ref(''), endTime = ref(''), price = ref(), isBusiness = ref(-1),
+    currentBoarding = ref([]), queryDialogVisible = ref(false), isOnTheRide = ref(-1),
     queryId = ref(''), queryData = ref([]), queryResultVisible = ref(false);
 
 const columnsCards = [
@@ -260,7 +260,7 @@ function getOnTheRide() {
         form.append('user_id', currentRow.value.user_id_number);
     }
     form.append('from_station', fromStation.value);
-    form.append('business_carriage', isBusiness.value ? 1 : 0);
+    form.append('business_carriage', isBusiness.value === 1 ? 1 : 0);
     form.append('start_time', becomeStyledTimeStr(startTime.value));
     axios({
         method: 'post',
@@ -308,8 +308,8 @@ function getAllBoardingRides() {
 function openQueryDialog() {
     queryDialogVisible.value = true;
     queryId.value = '';
-    isBusiness.value = false;
-    isOnTheRide.value = false;
+    isBusiness.value = -1;
+    isOnTheRide.value = -1;
     price.value = '';
     startTime.value = '';
     fromStation.value = '';
@@ -324,8 +324,10 @@ function getQueryResult() {
         } else {
             form.append('user_id', queryId.value);
         }
-    form.append('business_carriage', isBusiness.value ? 1 : 0);
-    form.append('on_the_ride', isOnTheRide.value ? 0 : 1);
+    if (isBusiness.value !== -1)
+        form.append('business_carriage', isBusiness.value);
+    if (isOnTheRide.value !== -1)
+        form.append('on_the_ride', 1 - isOnTheRide.value); // isOnTheRide: 1 for finish
     if (price.value !== '' && price.value !== undefined)
         form.append('price', price.value);
     if (startTime.value !== '' && startTime.value !== undefined)
@@ -408,33 +410,35 @@ function getQueryResult() {
         </el-table>
     </div>
     <el-dialog title="Query Result" v-model="queryResultVisible" width="800">
-        <el-table :data="queryData" style="width: 100%; max-height: 300px">
-            <el-table-column v-for="column in getRideColumnsFull()" :key="column.data_key"
-                             :label="column.title" :prop="column.data_key">
-                <template #default="{row}">
-                    <span v-if="column.isSpecial !== true">{{ row[column.data_key] }}</span>
-                    <span v-else-if="column.data_key === 'start_time'">
+        <div class="w-full overflow-scroll max-h-80">
+            <el-table :data="queryData" style="width: 100%">
+                <el-table-column v-for="column in getRideColumnsFull()" :key="column.data_key"
+                                 :label="column.title" :prop="column.data_key">
+                    <template #default="{row}">
+                        <span v-if="column.isSpecial !== true">{{ row[column.data_key] }}</span>
+                        <span v-else-if="column.data_key === 'start_time'">
                         {{ dayjs(row['start_time']).format('MM-DD HH:mm:ss') }}
                     </span>
-                    <span v-else-if="column.data_key === 'end_time'">
+                        <span v-else-if="column.data_key === 'end_time'">
                         {{ row['on_the_ride'] ? dayjs(row['end_time']).format('MM-DD HH:mm:ss') : 'Not yet' }}
                     </span>
-                    <span v-else-if="column.data_key === 'on_the_ride'
+                        <span v-else-if="column.data_key === 'on_the_ride'
                                 || column.data_key === 'business_carriage'">
                             {{ row['on_the_ride'] ? 'No' : 'Yes' }}
                         </span>
-                    <span v-else-if="column.data_key === 'business_carriage'">
+                        <span v-else-if="column.data_key === 'business_carriage'">
                             {{ row['business_carriage'] ? 'Yes' : 'No' }}
                         </span>
-                    <span v-else-if="column.data_key === 'price'">
+                        <span v-else-if="column.data_key === 'price'">
                         {{ row['on_the_ride'] ? '¥ ' + row['price'] : 'Not yet' }}
                         </span>
-                    <span v-else-if="column.data_key === 'to_station'">
+                        <span v-else-if="column.data_key === 'to_station'">
                             {{ row['on_the_ride'] ? row[column.data_key] : 'Not yet' }}
                         </span>
-                </template>
-            </el-table-column>
-        </el-table>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
         <br/>
         <div class="text-center">
             <el-button type="primary" class="w-32" size="large" @click="queryResultVisible = false">
@@ -454,10 +458,38 @@ function getQueryResult() {
                 <el-input v-model="queryId" placeholder="Valid user ID number"/>
             </el-form-item>
             <el-form-item label="Business Carriage">
-                <el-switch v-model="isBusiness" active-text="Yes" inactive-text="No"/>
+                <el-dropdown>
+                    <span class="el-dropdown-link">
+                          {{ isBusiness === -1 ? 'All' : isBusiness === 1 ? 'Yes' : 'No' }}
+                          <el-icon class="el-icon--right">
+                            <arrow-down/>
+                          </el-icon>
+                    </span>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item @click="isBusiness = -1">All</el-dropdown-item>
+                            <el-dropdown-item @click="isBusiness = 1">Yes</el-dropdown-item>
+                            <el-dropdown-item @click="isBusiness = 0">No</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
             </el-form-item>
             <el-form-item label="On the ride">
-                <el-switch v-model="isOnTheRide" active-text="Yes" inactive-text="No"/>
+                <el-dropdown>
+                    <span class="el-dropdown-link">
+                          {{ isOnTheRide === -1 ? 'All' : isOnTheRide === 1 ? 'Yes' : 'No' }}
+                          <el-icon class="el-icon--right">
+                            <arrow-down/>
+                          </el-icon>
+                    </span>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item @click="isOnTheRide = -1">All</el-dropdown-item>
+                            <el-dropdown-item @click="isOnTheRide = 1">Yes</el-dropdown-item>
+                            <el-dropdown-item @click="isOnTheRide = 0">No</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
             </el-form-item>
             <el-form-item label="Price">
                 <el-input v-model="price">
@@ -475,7 +507,6 @@ function getQueryResult() {
             <el-form-item label="To Station">
                 <el-input v-model="toStation" placeholder="To station ID"/>
             </el-form-item>
-
         </el-form>
         <br/>
         <div class="text-center">
@@ -533,21 +564,23 @@ function getQueryResult() {
     </el-dialog>
     <el-dialog title="More actions" v-model="moreDialogVisible" width="800">
         <p class="text-xl mb-2">All rides that is going on</p>
-        <el-table :data="currentBoarding" style="width: 100%">
-            <el-table-column v-for="column in getRideColumns()" :key="column.data_key"
-                             :label="column.title" :prop="column.data_key">
-                <template #default="{row}">
-                    <span v-if="column.isSpecial !== true">{{ row[column.data_key] }}</span>
-                    <span v-else-if="column.data_key === 'on_the_ride'
+        <div class="w-full overflow-scroll">
+            <el-table :data="currentBoarding" style="width: 100%">
+                <el-table-column v-for="column in getRideColumns()" :key="column.data_key"
+                                 :label="column.title" :prop="column.data_key">
+                    <template #default="{row}">
+                        <span v-if="column.isSpecial !== true">{{ row[column.data_key] }}</span>
+                        <span v-else-if="column.data_key === 'on_the_ride'
                                 || column.data_key === 'business_carriage'">
                             {{ row['on_the_ride'] ? 'No' : 'Yes' }}
                         </span>
-                    <span v-else>
+                        <span v-else>
                             {{ dayjs(row[column.data_key]).format('MM-DD HH:mm:ss') }}
                         </span>
-                </template>
-            </el-table-column>
-        </el-table>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
         <br/>
         <div class="text-center">
             <el-button type="primary" class="w-32" size="large" @click="moreDialogVisible = false">
