@@ -9,7 +9,7 @@ const mode = ref('Cards'), data = ref([]), loading = ref(false),
     page = ref(1), elem_per_page = ref(20), total = ref(0),
     moreDialogVisible = ref(false), dialogVisible = ref(false), currentRow = ref({}),
     currentRides = ref([]), onlineRides = ref([]), fromStation = ref(''), startTime = ref(''),
-    toStation = ref(''), endTime = ref(''), price = ref(), isBusiness = ref(-1),
+    toStation = ref(''), endTime = ref(''), price = ref(), isBusiness = ref(-1), isBusinessBool = ref(false),
     currentBoarding = ref([]), queryDialogVisible = ref(false), isOnTheRide = ref(-1),
     queryId = ref(''), queryData = ref([]), queryResultVisible = ref(false);
 
@@ -260,7 +260,11 @@ function getOnTheRide() {
         form.append('user_id', currentRow.value.user_id_number);
     }
     form.append('from_station', fromStation.value);
-    form.append('business_carriage', isBusiness.value === 1 ? 1 : 0);
+    if (isBusinessBool.value) {
+        form.append('business_carriage', 1);
+    } else {
+        form.append('business_carriage', 0);
+    }
     form.append('start_time', becomeStyledTimeStr(startTime.value));
     axios({
         method: 'post',
@@ -309,6 +313,7 @@ function openQueryDialog() {
     queryDialogVisible.value = true;
     queryId.value = '';
     isBusiness.value = -1;
+    isBusinessBool.value = false;
     isOnTheRide.value = -1;
     price.value = '';
     startTime.value = '';
@@ -427,7 +432,7 @@ function getQueryResult() {
                             {{ row['on_the_ride'] ? 'No' : 'Yes' }}
                         </span>
                         <span v-else-if="column.data_key === 'business_carriage'">
-                            {{ row['business_carriage'] ? 'Yes' : 'No' }}
+                            {{ row['business_carriage'] == 1 ? 'Yes' : 'No' }}
                         </span>
                         <span v-else-if="column.data_key === 'price'">
                         {{ row['on_the_ride'] ? '¥ ' + row['price'] : 'Not yet' }}
@@ -529,10 +534,12 @@ function getQueryResult() {
                                      :label="column.title" :prop="column.data_key">
                         <template #default="{row}">
                             <span v-if="column.isSpecial !== true">{{ row[column.data_key] }}</span>
-                            <span v-else-if="column.data_key === 'on_the_ride'
-                                || column.data_key === 'business_carriage'">
-                            {{ row['on_the_ride'] ? 'No' : 'Yes' }}
-                        </span>
+                            <span v-else-if="column.data_key === 'on_the_ride'">
+                                {{ row['on_the_ride'] ? 'No' : 'Yes' }}
+                            </span>
+                            <span v-else-if="column.data_key === 'business_carriage'">
+                                {{ row['business_carriage'] == 1 ? 'Yes' : 'No' }}
+                            </span>
                             <span v-else>
                             {{ dayjs(row[column.data_key]).format('MM-DD HH:mm:ss') }}
                         </span>
@@ -543,7 +550,7 @@ function getQueryResult() {
             <el-form-item label="Get on the ride" v-if="onlineRides.length === 0">
                 <el-input class="mb-2" placeholder="From station ID" v-model="fromStation"/>
                 <el-date-picker type="datetime" class="mb-2" v-model="startTime" placeholder="Start time"/>
-                <el-switch v-model="isBusiness" class="mr-2" active-text="Business ride if possible"/>
+                <el-switch v-model="isBusinessBool" class="mr-2" active-text="Business ride if possible"/>
                 <el-button type="primary" plain @click="getOnTheRide">Get on the ride</el-button>
             </el-form-item>
             <el-form-item label="Get off the ride" v-if="onlineRides.length > 0">
